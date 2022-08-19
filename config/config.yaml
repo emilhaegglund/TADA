@@ -1,0 +1,32 @@
+# Config file to build blast database based on taxonomical sampling
+
+# Base path for output
+paths:
+  results: "results_test"
+
+# Set which sampling method and database to use
+method:
+  sample_refseq: False
+  sample_gtdb: True
+  trim_gtdb: False
+
+# Options for sampling the RefSeq-database
+sample_refseq:
+    max_taxa: 1
+    taxonomic_level: "phylum"
+
+# Options for sampling the GTDB-database using a set number of taxa for the selected
+# taxonomical level.
+sample_gtdb:
+  max_taxa: 1
+  taxonomic_level: "phylum"
+
+# Or use phylogenetic distance from the GTDB phylogeny to trim to a set
+# number of taxa.
+trim_gtdb:
+  number_taxa: 1000
+
+# All records in GenBank does not have an associated annotation.
+# Setting the following option to True will download these redords
+# and annotate them with Prodigal and include them in the database.
+keep_non_annotated: True
