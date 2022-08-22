@@ -19,6 +19,7 @@ args = parse_command_line()
 tree = Tree(args.phylogeny, format=1, quoted_node_names=True)
 
 # Compute distance between each sister leaf-pair
+print('Calculate pair-wise distances')
 distance_list = []
 for node in tree.traverse():
     child_nodes = node.get_children()
@@ -30,7 +31,9 @@ for node in tree.traverse():
 sorted_distance_list = sorted(distance_list, key=lambda t: t[0])
 
 # Until selected number of taxa
+print('Start to remove leaves')
 while len(tree.get_leaves()) >= args.taxa:
+    print(len(tree.get_leaves))
     min_distance, min_node = sorted_distance_list[0]
 
     # Randomly trim one of the leaf

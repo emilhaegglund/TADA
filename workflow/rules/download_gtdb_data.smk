@@ -23,3 +23,14 @@ rule download_gtdb_metadata:
         wget -P {params.output_dir} {params.url} && \
         tar -xvf {params.zip_file} -C {params.output_dir}
         """
+
+rule download_gtdb_phylogenies:
+    output:
+       config["paths"]["results"] + "/gtdb_data/{domain}_r207.tree"
+    params:
+        output_dir=config["paths"]["results"] + "/gtdb_data/",
+        url="https://data.ace.uq.edu.au/public/gtdb/data/releases/release207/207.0/{domain}_r207.tree"
+    shell:
+        """
+        wget -P {params.output_dir} {params.url}
+        """
