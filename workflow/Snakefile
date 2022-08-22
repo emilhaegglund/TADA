@@ -1,0 +1,94 @@
+import os
+
+include: "rules/download_gtdb_data.smk"
+include: "rules/download_refseq_data.smk"
+include: "rules/gtdb.smk"
+#include: "rules/refseq.smk"
+
+def all_input(wildcards):
+    """
+    Generate all inputs for the rule all
+    """
+    from scripts.define_inputs import gtdb_data_files
+    from scripts.define_inputs import gtdb_sampled_genome_files
+
+    wanted_input = []
+
+    base_dir = config["paths"]["results"]
+    if config["method"]["refseq"]:
+        wanted_input.append(os.path.join(base_dir, "refseq_data/assembly_summary_refseq.txt"))
+
+    if config["method"]["sample_gtdb"] or config["method"]["trim_gtdb"]:
+        wanted_input += gtdb_data_files(config)
+
+    if config["method"]["sample_gtdb"]:
+        wanted_input += gtdb_sampled_genome_files(config)
+
+    if config["method"]["trim_gtdb"]:
+        wanted_input.append(os.path.join(config["paths"]["results"], "gtdb_trimming/bac120_r207_trimmed_genomes.tsv"))
+    return wanted_input
+
+rule all:
+    input: all_input
+
+#
+#rule download_proteomes:
+#    input:
+#        "results/gtdb/sampled_genomes.tsv"
+#    output:
+#        directory("results/gtdb/ncbi_proteomes")
+#    conda:
+#        "envs/bit.yaml"
+#    threads:
+#        12
+#    shell:
+#        """
+#        mkdir {output};
+#        cd results/gtdb/;
+#        input=$(basename {input});
+#        bit-dl-ncbi-assemblies -w $input -f protein -j {threads};
+#        mv *.faa.gz {output};
+#        """
+
+#rule move_not_found:
+#    input:
+#
+#
+#
+#rule download_genomes:
+#    input:
+#        "results/gtdb/accessions-not-found.txt"
+#    output:
+#        directory("results/gtdb/genomes")
+#    conda:
+#        "envs/bit.yaml"
+#    threads:
+#       12
+#    shell:
+#        """
+#        bit-dl-ncbi-assemblies -w {input} -f fasta -j {threads}
+#        """
+#
+##TODO: What to do with suppresed genomes?
+#
+#rule run_prodigal:
+#    input:
+#        "results/gtdb/"
+#    output:
+#        "results/gtdb/prodigal_annotation"
+#    conda:
+#        "envs/prodigal.yaml"
+#    shell:
+#        "prodigal"
+
+#rule download_gtdb_format_taxonomy:
+#
+#rule create_prot2taxa_map:
+#
+#rule build_diamond:
+#    input:
+#
+#    output:
+#
+#    conda:
+#        "envs/diamond.yaml"

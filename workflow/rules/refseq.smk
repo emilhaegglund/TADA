@@ -1,18 +1,4 @@
 
-
-rule all:
-    input:
-        "results/assembly_summary_refseq.txt",
-        "results/assembly_summary_refseq_historical.txt",
-        "results/taxdmp/nodes.dmp"
-
-""" Download necessary files from NCBI """
-rule download_assembly_summary:
-    output:
-        "results/assembly_summary_refseq.txt"
-    shell:
-        "wget -P results// https://ftp.ncbi.nlm.nih.gov/genomes/refseq/assembly_summary_refseq.txt"
-
 rule download_assembly_summary_historical:
     output:
         "results/assembly_summary_refseq_historical.txt"
