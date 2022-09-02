@@ -34,7 +34,7 @@ rule trim_gtdb_taxonomy:
     params:
         taxa=config["trim_gtdb"]["number_bac"]
     conda:
-        "envs/ete.yaml"
+        "../envs/ete.yaml"
     shell:
         """
         python scripts/trim_gtdb_phylogeny.py \

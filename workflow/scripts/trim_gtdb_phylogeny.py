@@ -33,7 +33,7 @@ sorted_distance_list = sorted(distance_list, key=lambda t: t[0])
 # Until selected number of taxa
 print('Start to remove leaves')
 while len(tree.get_leaves()) >= args.taxa:
-    print(len(tree.get_leaves))
+    print(len(tree.get_leaves()))
     min_distance, min_node = sorted_distance_list[0]
 
     # Randomly trim one of the leaf

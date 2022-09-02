@@ -15,7 +15,7 @@ def all_input(wildcards):
     wanted_input = []
 
     base_dir = config["paths"]["results"]
-    if config["method"]["refseq"]:
+    if config["method"]["sample_refseq"]:
         wanted_input.append(os.path.join(base_dir, "refseq_data/assembly_summary_refseq.txt"))
 
     if config["method"]["sample_gtdb"] or config["method"]["trim_gtdb"]:
