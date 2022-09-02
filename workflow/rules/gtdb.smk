@@ -6,7 +6,8 @@ rule sample_gtdb:
         bac_taxa=config["paths"]["results"] + "/gtdb_data/{domain}_taxonomy_r207.tsv",
         bac_metadata=config["paths"]["results"] + "/gtdb_data/{domain}_metadata_r207.tsv"
     output:
-        config["paths"]["results"] + "/gtdb_sampling/sampled_{domain}_genomes.tsv"
+        genbank=config["paths"]["results"] + "/gtdb_sampling/sampled_{domain}_genbank_genomes.tsv",
+        refseq=config["paths"]["results"] + "/gtdb_sampling/sampled_{domain}_refseq_genomes.tsv"
     params:
         taxonomic_level=config["sample_gtdb"]["taxonomic_level"],
         max_taxa=config["sample_gtdb"]["max_taxa"],
@@ -23,7 +24,24 @@ rule sample_gtdb:
             --completeness {params.completeness} \
             --contamination {params.contamination} \
             --gtdb-representative {params.gtdb_representative} \
-            --output {output}
+            --output-refseq {output.refseq} \
+            --output-genbank {output.genbank}
+        """
+
+rule ncbi_download_genomes_refseq:
+    input:
+        config["paths"]["results"] + "/gtdb_sampling/sampled_{domain}_{database}_genomes.tsv"
+    output:
+        dir(config["paths"]["results"] + "/gtdb_sampling/sampled_{domain}_{database}_genomes/")
+    params:
+        db='{database}'
+    threads:
+        12
+    conda:
+        "../envs/ncbi-download-genomes.yaml"
+    shell:
+        """
+        ncbi-download-genomes -F protein-fasta -A {input} --flat-output -p {threads} -o {output} -s {params.db} all
         """
 
 rule trim_gtdb_taxonomy:

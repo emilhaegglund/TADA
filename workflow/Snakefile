@@ -23,6 +23,7 @@ def all_input(wildcards):
 
     if config["method"]["sample_gtdb"]:
         wanted_input += gtdb_sampled_genome_files(config)
+        print(wanted_input)
 
     if config["method"]["trim_gtdb"]:
         wanted_input.append(os.path.join(config["paths"]["results"], "gtdb_trimming/bac120_r207_trimmed_genomes.tsv"))

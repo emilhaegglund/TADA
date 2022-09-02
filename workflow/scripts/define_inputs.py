@@ -22,8 +22,8 @@ def gtdb_data_files(config):
 def gtdb_sampled_genome_files(config):
     wanted_input = []
     base_dir = config["paths"]["results"]
-    sampled_genome_files = ["bac120_sampled_genomes.tsv",
-                            "ar53_sampled_genomes.tsv"]
+    sampled_genome_files = ["sampled_bac120_refseq_genomes.tsv",
+                            "sampled_bac120_genbank_genomes.tsv"]
     for f in sampled_genome_files:
         wanted_input.append(os.path.join(base_dir, "gtdb_sampling", f))
 

@@ -7,8 +7,8 @@ paths:
 # Set which sampling method and database to use
 method:
   sample_refseq: False
-  sample_gtdb: False
-  trim_gtdb: True
+  sample_gtdb: True
+  trim_gtdb: False
 
 # Options for sampling the RefSeq-database
 sample_refseq:
