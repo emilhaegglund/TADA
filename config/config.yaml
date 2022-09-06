@@ -2,13 +2,13 @@
 
 # Base path for output
 paths:
-  results: "results_test"
+  results: "results_test_prune"
 
 # Set which sampling method and database to use
 method:
   sample_refseq: False
-  subsample_gtdb: True
-  prune_gtdb: False
+  subsample_gtdb: False
+  prune_gtdb: True
 
 # Options for sampling the RefSeq-database
 sample_refseq:
@@ -23,17 +23,11 @@ subsample_gtdb:
   completeness: 90
   contamination: 5
   gtdb_representative: True
-  sampling_scheme: "sampling_scheme.yaml"
 
 # Or use phylogenetic distance from the GTDB phylogeny to trim to a set
 # number of taxa.
 prune_gtdb:
-  bac120: 1000
-  ar53: 200
+  bac120: 100
+  ar53: 20
   completeness: 90
   contamination: 5
-
-# All records in GenBank does not have an associated annotation.
-# Setting the following option to True will download these redords
-# and annotate them with Prodigal and include them in the database.
-keep_non_annotated: True

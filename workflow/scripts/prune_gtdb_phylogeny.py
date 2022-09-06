@@ -15,7 +15,6 @@ def parse_command_line():
     args.add_argument("--output-genbank", required=True)
     args.add_argument("--completeness", type=float, default=0)
     args.add_argument("--contamination", type=float, default=100)
-    args.add_argument("--cpus", default=1, type=int)
     return args.parse_args()
 
 
@@ -62,19 +61,12 @@ for node in nodes:
         distance = sum([node.get_distance(child) for child in child_nodes])
         distance_list.append((distance, node))
 
-#start_time = time.time()
-#pool = mp.Pool(args.cpus)
-#distance_list = pool.map(calculate_distance, nodes)
-distance_list = [dist for dist in distance_list if dist != None]
-#print(time.time() - start_time)
-
 # Sort the distances
 sorted_distance_list = sorted(distance_list, key=lambda t: t[0])
-print(sorted_distance_list[:10])
 
 # Until selected number of taxa
 print('Start to remove leaves')
-while len(tree.get_leaves()) >= args.taxa:
+while len(tree.get_leaves()) > args.taxa:
     if len(tree.get_leaves()) % 1000 == 0:
         print(len(tree.get_leaves()))
     min_distance, min_node = sorted_distance_list[0]

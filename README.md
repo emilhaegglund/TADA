@@ -1,5 +1,5 @@
 # SDBW
-A snakemake workflow to subsample taxa from GTDB or RefSeq based on taxonomic/phylogenomic information and create a protein-sequence blast (Diamond) database from them.
+A snakemake workflow to subsample taxa from GTDB or RefSeq based on taxonomic/phylogenomic information and create a protein-sequence blast database (Diamond) from them.
 
 ## Installing
 First clone this repository from git using

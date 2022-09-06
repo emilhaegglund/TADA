@@ -6,7 +6,7 @@ rule prune_gtdb_phylogeny:
         refseq=config["paths"]["results"] + "/prune_gtdb/sampled_{domain}_refseq_accessions.tsv",
         genbank=config["paths"]["results"] + "/prune_gtdb/sampled_{domain}_genbank_accessions.tsv",
     params:
-        taxa=lambda wildcards: config["trim_gtdb"]["{}".format(wildcards.domain)],
+        taxa=lambda wildcards: config["prune_gtdb"]["{}".format(wildcards.domain)],
         completeness=config["prune_gtdb"]["completeness"],
         contamination=config["prune_gtdb"]["contamination"],
     conda:
@@ -59,14 +59,16 @@ rule ncbi_download_proteomes:
     output:
         directory(config["paths"]["results"] + "/{method}/sampled_{domain}_{database}_proteomes/")
     params:
-        db='{database}'
+        db='{database}',
+        output_dir=config["paths"]["results"] + "/{method}/sampled_{domain}_{database}_proteomes/"
     threads:
         12
     conda:
         "../envs/ncbi-download-genomes.yaml"
     shell:
         """
-        ncbi-genome-download -F protein-fasta -A {input} --flat-output -p {threads} -o {output} -s {params.db} all
+        mkdir -p {output}
+        ncbi-genome-download -F protein-fasta -A {input} --flat-output -p {threads} -o {output} -s {params.db} all || true
         """
 
 # Not all assemblies in GenBank contains annotation. Find the sampled taxa for which it was not possible
@@ -145,7 +147,7 @@ rule gather_protein_sequences:
         temp(config["paths"]["results"] + "/{method}/sampled_{domain}.faa")
     shell:
         """
-        zcat {input.refseq}/* {input.genbank}/* > {output}
+        zcat {input.refseq}/* {input.genbank}/* > {output} || true
         """
 
 rule make_diamond_db:
