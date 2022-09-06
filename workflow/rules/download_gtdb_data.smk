@@ -34,3 +34,16 @@ rule download_gtdb_phylogenies:
         """
         wget -P {params.output_dir} {params.url}
         """
+
+rule download_gtdb_taxdump:
+    output:
+        directory(config["paths"]["results"] + "/gtdb_data/gtdb-taxdump/")
+    params:
+        output_dir=config["paths"]["results"] + "/gtdb_data/",
+        zip_file=config["paths"]["results"] + "/gtdb_data/gtdb-taxdump.tar.gz",
+        url="https://github.com/shenwei356/gtdb-taxdump/releases/download/v0.1.1/gtdb-taxdump.tar.gz"
+    shell:
+        """
+        wget -P {params.output_dir} {params.url} && \
+        tar -xvf {params.zip_file} -C {params.output_dir}
+        """

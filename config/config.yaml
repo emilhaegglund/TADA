@@ -7,8 +7,8 @@ paths:
 # Set which sampling method and database to use
 method:
   sample_refseq: False
-  sample_gtdb: True
-  trim_gtdb: False
+  subsample_gtdb: True
+  prune_gtdb: False
 
 # Options for sampling the RefSeq-database
 sample_refseq:
@@ -17,18 +17,21 @@ sample_refseq:
 
 # Options for sampling the GTDB-database using a set number of taxa for the selected
 # taxonomical level.
-sample_gtdb:
+subsample_gtdb:
   max_taxa: 1
-  taxonomic_level: "phylum"
-  completeness: 0.8
-  contamination: 0.2
-  gtdb_representative: False
+  taxonomic_level: "class"
+  completeness: 90
+  contamination: 5
+  gtdb_representative: True
+  sampling_scheme: "sampling_scheme.yaml"
 
 # Or use phylogenetic distance from the GTDB phylogeny to trim to a set
 # number of taxa.
-trim_gtdb:
-  number_bac: 1000
-  number_ar: 200
+prune_gtdb:
+  bac120: 1000
+  ar53: 200
+  completeness: 90
+  contamination: 5
 
 # All records in GenBank does not have an associated annotation.
 # Setting the following option to True will download these redords

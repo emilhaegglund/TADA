@@ -2,6 +2,10 @@ import os
 
 
 def gtdb_data_files(config):
+    """
+    Define files that needs to be downloaded to run the GTDB-related
+    workflows.
+    """
     wanted_input = []
 
     base_dir = config["paths"]["results"]
@@ -12,6 +16,7 @@ def gtdb_data_files(config):
         "bac120_metadata_r207.tsv",
         "ar53_r207.tree",
         "bac120_r207.tree",
+        "gtdb-taxdump/",
     ]
     for f in gtdb_data_files:
         wanted_input.append(os.path.join(base_dir, "gtdb_data", f))
@@ -19,12 +24,17 @@ def gtdb_data_files(config):
     return wanted_input
 
 
-def gtdb_sampled_genome_files(config):
+def gtdb_workflow_files(config):
+    """
+    Define common output files for the subsample and prune workflow.
+    """
     wanted_input = []
     base_dir = config["paths"]["results"]
-    sampled_genome_files = ["sampled_bac120_refseq_genomes.tsv",
-                            "sampled_bac120_genbank_genomes.tsv"]
-    for f in sampled_genome_files:
-        wanted_input.append(os.path.join(base_dir, "gtdb_sampling", f))
+    if config["method"]["subsample_gtdb"]:
+        wanted_input.append(
+            os.path.join(base_dir, "subsample_gtdb", "subsample_gtdb.dmnd")
+        )
+    elif config["method"]["prune_gtdb"]:
+        wanted_input.append(os.path.join(base_dir, "prune_gtdb", "prune_gtdb.dmnd"))
 
     return wanted_input

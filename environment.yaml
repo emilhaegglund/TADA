@@ -1,0 +1,12 @@
+name: sdbw
+
+channels:
+  - conda-forge
+  - bioconda
+  - defaults
+
+dependencies:
+  - python>=3.7
+  - mamba
+  - snakemake-minimal>=5.3.0
+  - pandas

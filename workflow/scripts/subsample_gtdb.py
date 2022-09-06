@@ -16,7 +16,7 @@ def read_command_line():
     )
     args.add_argument("--max-taxa", type=int, default=1)
     args.add_argument("--completeness", type=float, default=0)
-    args.add_argument("--contamination", type=float, default=1)
+    args.add_argument("--contamination", type=float, default=100)
     args.add_argument("--gtdb-representative")
 
     return args.parse_args()
@@ -60,7 +60,13 @@ df["accession"] = df["accession"].str.replace("RS_", "")
 
 sampled_accessions = []
 for i, taxa_level_df in df.groupby(args.taxonomic_level):
-    sampled_accessions.append(taxa_level_df.sample(args.max_taxa))
+    # Can't take a sample if the sample size we ask for is larger than
+    # the number of taxa in that group. In that case, use all taxa in
+    # the group.
+    if taxa_level_df.shape[0] > args.max_taxa:
+        sampled_accessions.append(taxa_level_df.sample(args.max_taxa))
+    else:
+        sampled_accessions.append(taxa_level_df)
 
 
 sampled_df = pd.concat(sampled_accessions)
