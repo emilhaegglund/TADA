@@ -82,21 +82,3 @@ different location, replace the path after `--configfile`
 cd workflow
 snakemake --cores 4 --use-conda --conda-frontend mamba --configfile ../config/config.yaml
 ```
-
-TODO:
-### Building a sampling scheme
-We can also do a more advanced sampling by adding the path to a file containing a sampling scheme.
-The sampling scheme is written in yaml-format. First row is the name of a  below this we define at what taxonomical class we want to sample from and finally the number of taxa we want to sample from this class.
-```
-taxonomic_name:
-  taxonomic_level:
-  max_taxa:
-```
-Giving a sample scheme will override the options for sampling given in the config. We can use the keyword `default` to define a genera
-```
-default:
-  taxonomic_level: "phylum"
-  max_taxa: 5
-```
-
-### Build the diamond database with taxonomical information
