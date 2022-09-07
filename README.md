@@ -39,6 +39,9 @@ method:
 ### Options for sampling RefSeq
 __TODO__: Not implemented yet.
 
+### GTDB
+GTDB uses the latest release r207. Before any subsampling is done, we remove records that have been suppressed from GenBank.
+
 ### Options for subsampling of GTDB
 Similar to the RefSeq, the main option is to set the taxonomical level to perform the subsampling, and also the maximum number of taxa to include. Valid taxonomical levels are `domain,phylum,class,order,family,genus,species`.
 ```

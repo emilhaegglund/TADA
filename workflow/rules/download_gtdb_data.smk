@@ -47,3 +47,28 @@ rule download_gtdb_taxdump:
         wget -P {params.output_dir} {params.url} && \
         tar -xvf {params.zip_file} -C {params.output_dir}
         """
+
+rule download_suppressed_records:
+    output:
+        config["paths"]["results"] + "/gtdb_data/assembly_summary_genbank_historical.txt"
+    params:
+        output_dir=config["paths"]["results"] + "/gtdb_data/",
+        url="https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_genbank_historical.txt"
+    shell:
+        """
+        wget -P {params.output_dir} {params.url}
+        """
+
+rule remove_suppressed_records:
+    input:
+        metadata=config["paths"]["results"] + "/gtdb_data/{domain}_metadata_r207.tsv",
+        suppressed_records=config["paths"]["results"] + "/gtdb_data/assembly_summary_genbank_historical.txt"
+    output:
+        config["paths"]["results"] + "/gtdb_data/{domain}_metadata_r207.wo_suppressed_records.tsv",
+    shell:
+        """
+        python scripts/remove_suppressed_records.py \
+            --metadata {input.metadata} \
+            --suppressed-records {input.suppressed_records} \
+            --output {output}
+        """

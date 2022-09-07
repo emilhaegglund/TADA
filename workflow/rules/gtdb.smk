@@ -1,7 +1,7 @@
 rule prune_gtdb_phylogeny:
     input:
         phylogeny=config["paths"]["results"] + "/gtdb_data/{domain}_r207.tree",
-        bac_metadata=config["paths"]["results"] + "/gtdb_data/{domain}_metadata_r207.tsv"
+        metadata=config["paths"]["results"] + "/gtdb_data/{domain}_metadata_r207.wo_suppressed_records.tsv"
     output:
         refseq=config["paths"]["results"] + "/prune_gtdb/sampled_{domain}_refseq_accessions.tsv",
         genbank=config["paths"]["results"] + "/prune_gtdb/sampled_{domain}_genbank_accessions.tsv",
@@ -16,7 +16,7 @@ rule prune_gtdb_phylogeny:
         python scripts/prune_gtdb_phylogeny.py \
             --phylogeny {input.phylogeny} \
             --taxa {params.taxa} \
-            --gtdb-metadata {input.bac_metadata} \
+            --gtdb-metadata {input.metadata} \
             --completeness {params.completeness} \
             --contamination {params.contamination} \
             --output-refseq {output.refseq} \
@@ -28,8 +28,8 @@ rule subsample_gtdb:
     Use the metadata and taxonomy information to subsample the gtdb-data.
     """
     input:
-        bac_taxa=config["paths"]["results"] + "/gtdb_data/{domain}_taxonomy_r207.tsv",
-        bac_metadata=config["paths"]["results"] + "/gtdb_data/{domain}_metadata_r207.tsv"
+        taxonomy=config["paths"]["results"] + "/gtdb_data/{domain}_taxonomy_r207.tsv",
+        metadata=config["paths"]["results"] + "/gtdb_data/{domain}_metadata_r207.wo_suppressed_records.tsv"
     output:
         genbank=config["paths"]["results"] + "/subsample_gtdb/sampled_{domain}_genbank_accessions.tsv",
         refseq=config["paths"]["results"] + "/subsample_gtdb/sampled_{domain}_refseq_accessions.tsv"
@@ -42,8 +42,8 @@ rule subsample_gtdb:
     shell:
         """
         python scripts/subsample_gtdb.py \
-            --gtdb-taxonomy {input.bac_taxa} \
-            --gtdb-metadata {input.bac_metadata} \
+            --gtdb-taxonomy {input.taxonomy} \
+            --gtdb-metadata {input.metadata} \
             --taxonomic-level {params.taxonomic_level} \
             --max-taxa {params.max_taxa} \
             --completeness {params.completeness} \

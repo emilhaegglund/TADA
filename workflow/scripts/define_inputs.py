@@ -12,10 +12,11 @@ def gtdb_data_files(config):
     gtdb_data_files = [
         "ar53_taxonomy_r207.tsv",
         "bac120_taxonomy_r207.tsv",
-        "ar53_metadata_r207.tsv",
-        "bac120_metadata_r207.tsv",
+        "ar53_metadata_r207.wo_suppressed_records.tsv",
+        "bac120_metadata_r207.wo_suppressed_records.tsv",
         "ar53_r207.tree",
         "bac120_r207.tree",
+        "assembly_summary_genbank_historical.txt",
         "gtdb-taxdump/",
     ]
     for f in gtdb_data_files:
