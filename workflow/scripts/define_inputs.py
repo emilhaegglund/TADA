@@ -17,6 +17,7 @@ def gtdb_data_files(config):
         "ar53_r207.tree",
         "bac120_r207.tree",
         "assembly_summary_genbank_historical.txt",
+        "assembly_summary_refseq_historical.txt",
         "gtdb-taxdump/",
     ]
     for f in gtdb_data_files:

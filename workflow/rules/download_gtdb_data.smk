@@ -48,7 +48,7 @@ rule download_gtdb_taxdump:
         tar -xvf {params.zip_file} -C {params.output_dir}
         """
 
-rule download_suppressed_records:
+rule download_suppressed_genbank_records:
     output:
         config["paths"]["results"] + "/gtdb_data/assembly_summary_genbank_historical.txt"
     params:
@@ -59,16 +59,29 @@ rule download_suppressed_records:
         wget -P {params.output_dir} {params.url}
         """
 
+rule download_suppressed_refseq_records:
+    output:
+        config["paths"]["results"] + "/gtdb_data/assembly_summary_refseq_historical.txt"
+    params:
+        output_dir=config["paths"]["results"] + "/gtdb_data/",
+        url="https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_refseq_historical.txt"
+    shell:
+        """
+        wget -P {params.output_dir} {params.url}
+        """
+
 rule remove_suppressed_records:
     input:
         metadata=config["paths"]["results"] + "/gtdb_data/{domain}_metadata_r207.tsv",
-        suppressed_records=config["paths"]["results"] + "/gtdb_data/assembly_summary_genbank_historical.txt"
+        suppressed_genbank_records=config["paths"]["results"] + "/gtdb_data/assembly_summary_genbank_historical.txt",
+        suppressed_refseq_records=config["paths"]["results"] + "/gtdb_data/assembly_summary_refseq_historical.txt"
     output:
         config["paths"]["results"] + "/gtdb_data/{domain}_metadata_r207.wo_suppressed_records.tsv",
     shell:
         """
         python scripts/remove_suppressed_records.py \
             --metadata {input.metadata} \
-            --suppressed-records {input.suppressed_records} \
+            --suppressed-genbank-records {input.suppressed_genbank_records} \
+            --suppressed-refseq-records {input.suppressed_refseq_records} \
             --output {output}
         """
