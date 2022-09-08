@@ -33,7 +33,7 @@ taxa_df[
 ] = taxa_df.taxonomy.str.split(";", expand=True)
 
 # Read GTDB metadata
-metadata_df = pd.read_csv(args.gtdb_metadata, sep="\t")
+metadata_df = pd.read_csv(args.gtdb_metadata, sep="\t", low_memory=False)
 
 # Merge the tables
 df = pd.merge(

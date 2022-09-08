@@ -86,7 +86,7 @@ rule remove_suppressed_records_from_metadata:
             --output {output}
         """
 
-rule remove_suppressed_records_from_metadata:
+rule remove_suppressed_records_from_taxonomy:
     input:
         taxonomy=config["paths"]["results"] + "/gtdb_data/{domain}_taxonomy_r207.tsv",
         suppressed_genbank_records=config["paths"]["results"] + "/gtdb_data/assembly_summary_genbank_historical.txt",
@@ -96,7 +96,7 @@ rule remove_suppressed_records_from_metadata:
     shell:
         """
         python scripts/remove_suppressed_records_from_taxonomy.py \
-            --metadata {input.taxonomy} \
+            --taxonomy {input.taxonomy} \
             --suppressed-genbank-records {input.suppressed_genbank_records} \
             --suppressed-refseq-records {input.suppressed_refseq_records} \
             --output {output}

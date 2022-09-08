@@ -53,5 +53,5 @@ suppressed_genbank_accessions = suppressed_genbank_df["assembly_accession"].to_l
 taxonomy_df = taxonomy_df[
     ~taxonomy_df["assembly_accession"].isin(suppressed_genbank_accessions)
 ]
-taxonomy_df.to_csv(args.output, sep="\t", index=False)
+taxonomy_df[["accession", "taxonomy"]].to_csv(args.output, sep="\t", index=False)
 
