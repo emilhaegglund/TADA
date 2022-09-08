@@ -70,7 +70,7 @@ rule download_suppressed_refseq_records:
         wget -P {params.output_dir} {params.url}
         """
 
-rule remove_suppressed_records:
+rule remove_suppressed_records_from_metadata:
     input:
         metadata=config["paths"]["results"] + "/gtdb_data/{domain}_metadata_r207.tsv",
         suppressed_genbank_records=config["paths"]["results"] + "/gtdb_data/assembly_summary_genbank_historical.txt",
@@ -79,8 +79,24 @@ rule remove_suppressed_records:
         config["paths"]["results"] + "/gtdb_data/{domain}_metadata_r207.wo_suppressed_records.tsv",
     shell:
         """
-        python scripts/remove_suppressed_records.py \
+        python scripts/remove_suppressed_records_from_metadata.py \
             --metadata {input.metadata} \
+            --suppressed-genbank-records {input.suppressed_genbank_records} \
+            --suppressed-refseq-records {input.suppressed_refseq_records} \
+            --output {output}
+        """
+
+rule remove_suppressed_records_from_metadata:
+    input:
+        taxonomy=config["paths"]["results"] + "/gtdb_data/{domain}_taxonomy_r207.tsv",
+        suppressed_genbank_records=config["paths"]["results"] + "/gtdb_data/assembly_summary_genbank_historical.txt",
+        suppressed_refseq_records=config["paths"]["results"] + "/gtdb_data/assembly_summary_refseq_historical.txt"
+    output:
+        config["paths"]["results"] + "/gtdb_data/{domain}_taxonomy_r207.wo_suppressed_records.tsv",
+    shell:
+        """
+        python scripts/remove_suppressed_records_from_taxonomy.py \
+            --metadata {input.taxonomy} \
             --suppressed-genbank-records {input.suppressed_genbank_records} \
             --suppressed-refseq-records {input.suppressed_refseq_records} \
             --output {output}

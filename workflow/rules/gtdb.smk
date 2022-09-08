@@ -28,7 +28,7 @@ rule subsample_gtdb:
     Use the metadata and taxonomy information to subsample the gtdb-data.
     """
     input:
-        taxonomy=config["paths"]["results"] + "/gtdb_data/{domain}_taxonomy_r207.tsv",
+        taxonomy=config["paths"]["results"] + "/gtdb_data/{domain}_taxonomy_r207.wo_suppressed_records.tsv",
         metadata=config["paths"]["results"] + "/gtdb_data/{domain}_metadata_r207.wo_suppressed_records.tsv"
     output:
         genbank=config["paths"]["results"] + "/subsample_gtdb/sampled_{domain}_genbank_accessions.tsv",

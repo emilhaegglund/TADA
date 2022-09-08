@@ -20,19 +20,33 @@ suppressed_names = [
 ]
 
 suppressed_refseq_df = pd.read_csv(
-    args.suppressed_refseq_records, sep='\t', comment="#", names=suppressed_names, usecols=[0]
+    args.suppressed_refseq_records,
+    sep="\t",
+    comment="#",
+    names=suppressed_names,
+    usecols=[0],
 )
 
 suppressed_genbank_df = pd.read_csv(
-    args.suppressed_genbank_records, sep="\t", comment="#", names=suppressed_names, usecols=[0]
+    args.suppressed_genbank_records,
+    sep="\t",
+    comment="#",
+    names=suppressed_names,
+    usecols=[0],
 )
 
 # For suppressed RefSeq records, fall back to genbank-accessions
 metadata_df["assembly_accession"] = metadata_df["accession"]
-metadata_df["assembly_accession"] = metadata_df["assembly_accession"].str.replace('RS_', '')
-metadata_df["assembly_accession"] = metadata_df["assembly_accession"].str.replace('GB_', '')
+metadata_df["assembly_accession"] = metadata_df["assembly_accession"].str.replace(
+    "RS_", ""
+)
+metadata_df["assembly_accession"] = metadata_df["assembly_accession"].str.replace(
+    "GB_", ""
+)
 suppressed_refseq_accessions = suppressed_refseq_df["assembly_accession"].to_list()
-metadata_df.loc[(metadata_df["assembly_accession"].isin(suppressed_refseq_accessions)), "accession"] = metadata_df["accession"].str.replace("RS_GCF", "GB_GCA")
+metadata_df.loc[
+    (metadata_df["assembly_accession"].isin(suppressed_refseq_accessions)), "accession"
+] = metadata_df["accession"].str.replace("RS_GCF", "GB_GCA")
 
 suppressed_genbank_accessions = suppressed_genbank_df["assembly_accession"].to_list()
 
