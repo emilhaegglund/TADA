@@ -10,10 +10,8 @@ def gtdb_data_files(config):
 
     base_dir = config["paths"]["results"]
     gtdb_data_files = [
-        "ar53_taxonomy_r207.tsv",
-        "bac120_taxonomy_r207.tsv",
-        "ar53_metadata_r207.wo_suppressed_records.tsv",
-        "bac120_metadata_r207.wo_suppressed_records.tsv",
+        "taxonomy_r207.wo_suppressed_records.tsv",
+        "metadata_r207.wo_suppressed_records.tsv",
         "ar53_r207.tree",
         "bac120_r207.tree",
         "assembly_summary_genbank_historical.txt",
@@ -26,9 +24,20 @@ def gtdb_data_files(config):
     return wanted_input
 
 
-def gtdb_workflow_files(config):
+def gtdb_sampling_files(config):
     """
-    Define common output files for the subsample and prune workflow.
+    Define output files for the sampling-step
+    """
+    wanted_input = []
+    base_dir = config["paths"]["results"]
+    if config["method"]["subsample_gtdb"]:
+        wanted_input.append(os.path.join(base_dir, "subsample_gtdb", "sampled_accessions.metadata.tsv"))
+        wanted_input.append(os.path.join(base_dir, "subsample_gtdb", "sampled_accessions.txt"))
+    return wanted_input
+
+def gtdb_output_files(config):
+    """
+    Define output files for the subsample and prune workflow.
     """
     wanted_input = []
     base_dir = config["paths"]["results"]

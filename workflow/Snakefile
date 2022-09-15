@@ -3,6 +3,7 @@ import os
 include: "rules/download_gtdb_data.smk"
 include: "rules/download_refseq_data.smk"
 include: "rules/gtdb.smk"
+include: "rules/download_genome_data.smk"
 #include: "rules/refseq.smk"
 
 def all_input(wildcards):
@@ -10,17 +11,23 @@ def all_input(wildcards):
     Generate all inputs for the rule all
     """
     from scripts.define_inputs import gtdb_data_files
-    from scripts.define_inputs import gtdb_workflow_files
+    from scripts.define_inputs import gtdb_sampling_files
+    from scripts.define_inputs import gtdb_output_files
 
     wanted_input = []
 
     base_dir = config["paths"]["results"]
-    if config["method"]["sample_refseq"]:
+    if config["method"]["subsample_refseq"]:
         wanted_input.append(os.path.join(base_dir, "refseq_data/assembly_summary_refseq.txt"))
 
     if config["method"]["subsample_gtdb"] or config["method"]["prune_gtdb"]:
         wanted_input += gtdb_data_files(config)
-        wanted_input += gtdb_workflow_files(config)
+        if config["method"]["auto_download"]:
+            wanted_input += gtdb_sampling_files(config)
+            wanted_input += gtdb_output_files(config)
+        else:
+            wanted_input += gtdb_sampling_files(config)
+
 
     return wanted_input
 

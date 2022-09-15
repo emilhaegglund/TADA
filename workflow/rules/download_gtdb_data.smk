@@ -101,3 +101,25 @@ rule remove_suppressed_records_from_taxonomy:
             --suppressed-refseq-records {input.suppressed_refseq_records} \
             --output {output}
         """
+
+rule merge_metadata_tables:
+    input:
+        bac_metadata=config["paths"]["results"] + "/gtdb_data/bac120_metadata_r207.wo_suppressed_records.tsv",
+        ar_metadata=config["paths"]["results"] + "/gtdb_data/ar53_metadata_r207.wo_suppressed_records.tsv"
+    output:
+        config["paths"]["results"] + "/gtdb_data/metadata_r207.wo_suppressed_records.tsv"
+    shell:
+        """
+        python scripts/merge_tables.py {input.bac_metadata} {input.ar_metadata} {output}
+        """
+
+rule merge_taxonomy_tables:
+    input:
+        bac_taxonomy=config["paths"]["results"] + "/gtdb_data/bac120_taxonomy_r207.wo_suppressed_records.tsv",
+        ar_taxonomy=config["paths"]["results"] + "/gtdb_data/ar53_taxonomy_r207.wo_suppressed_records.tsv"
+    output:
+        config["paths"]["results"] + "/gtdb_data/taxonomy_r207.wo_suppressed_records.tsv"
+    shell:
+        """
+        python scripts/merge_tables.py {input.bac_taxonomy} {input.ar_taxonomy} {output}
+        """

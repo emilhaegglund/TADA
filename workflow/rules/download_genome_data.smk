@@ -1,12 +1,33 @@
-kingdom={'ar53':'Archaea', 'bac120':'Bacteria'}
+rule get_refseq_accessions:
+    input:
+        config["paths"]["results"] + "/{method}/sampled_accessions.txt",
+    output:
+        config["paths"]["results"] + "/{method}/sampled_refseq_accessions.txt"
+    shell:
+        """
+        echo 'accession' > {output};
+        grep 'GCF' {input} >> {output} || true;
+        """
+
+rule get_genbank_accessions:
+    input:
+        config["paths"]["results"] + "/{method}/sampled_accessions.txt",
+    output:
+        temporary(config["paths"]["results"] + "/{method}/sampled_genbank_accessions.txt")
+    shell:
+        """
+        echo 'accession' > {output};
+        grep 'GCA' {input} >> {output} || true;
+        """
+
 rule ncbi_download_proteomes:
     input:
-        config["paths"]["results"] + "/{method}/sampled_{domain}_{database}_accessions.tsv"
+        config["paths"]["results"] + "/{method}/sampled_{database}_accessions.txt"
     output:
-        directory(config["paths"]["results"] + "/{method}/sampled_{domain}_{database}_proteomes/")
+        directory(config["paths"]["results"] + "/{method}/sampled_{database}_proteomes/")
     params:
         db='{database}',
-        output_dir=config["paths"]["results"] + "/{method}/sampled_{domain}_{database}_proteomes/"
+        output_dir=config["paths"]["results"] + "/{method}/sampled_{database}_proteomes/"
     threads:
         12
     conda:
@@ -22,9 +43,9 @@ rule ncbi_download_proteomes:
 rule  get_accessions_wo_annotation:
     input:
         proteome_dir = rules.ncbi_download_proteomes.output,
-        genbank_accessions = config["paths"]["results"] + "/{method}/sampled_{domain}_{database}_accessions.tsv"
+        genbank_accessions = config["paths"]["results"] + "/{method}/sampled_{database}_accessions.txt"
     output:
-        config["paths"]["results"] + "/{method}/sampled_{domain}_{database}_genomes_wo_annotation.tsv"
+        config["paths"]["results"] + "/{method}/sampled_{database}_genomes_wo_annotation.tsv"
     shell:
         """
         python scripts/check_proteome_download.py {input.genbank_accessions} {input.proteome_dir} {output}
@@ -33,9 +54,9 @@ rule  get_accessions_wo_annotation:
 # Needs to define a checkpoint here since we don't know for which taxa we have to run prodigal for.
 checkpoint ncbi_download_genomes:
     input:
-        config["paths"]["results"] + "/{method}/sampled_{domain}_genbank_genomes_wo_annotation.tsv"
+        config["paths"]["results"] + "/{method}/sampled_genbank_genomes_wo_annotation.tsv"
     output:
-        directory(config["paths"]["results"] + "/{method}/sampled_{domain}_genbank_genomes/")
+        directory(config["paths"]["results"] + "/{method}/sampled_genbank_genomes/")
     params:
         db='genbank'
     threads:
@@ -44,23 +65,26 @@ checkpoint ncbi_download_genomes:
         "../envs/ncbi-download-genomes.yaml"
     shell:
         """
-        ncbi-genome-download -F fasta -A {input} --flat-output -p {threads} -o {output} -s {params.db} all
+        mkdir -p {output}
+        ncbi-genome-download -F fasta -A {input} --flat-output -p {threads} -o {output} -s {params.db} all || true
         """
 
 # Input function
 def get_genome_accessions(wildcards):
     ck_output = checkpoints.ncbi_download_genomes.get(**wildcards).output[0]
-    return expand(config["paths"]["results"] + "/{method}/{annotation}_{domain}/{accession}/{accession}.faa",
+    return expand(config["paths"]["results"] + "/{method}/{annotation}/{accession}/{accession}.faa",
                     method=wildcards.method,
-                    domain=wildcards.domain,
                     annotation=config["annotation_method"],
                     accession=glob_wildcards(os.path.join(ck_output, "{accession}_genomic.fna.gz")).accession)
 
+def get_accession(wildcards):
+    return "_".join(wildcards.accession.split('_'))[:2]
+
 rule unzip_genomes:
     input:
-        config["paths"]["results"] + "/{method}/sampled_{domain}_genbank_genomes/{accession}_genomic.fna.gz"
+        config["paths"]["results"] + "/{method}/sampled_genbank_genomes/{accession}_genomic.fna.gz"
     output:
-        temp(config["paths"]["results"] + "/{method}/sampled_{domain}_genbank_genomes_unzipped/{accession}_genomic.fna")
+        temp(config["paths"]["results"] + "/{method}/sampled_genbank_genomes_unzipped/{accession}_genomic.fna")
     shell:
         "gunzip -c {input} > {output}"
 
@@ -80,19 +104,24 @@ rule unzip_genomes:
 
 rule prokka:
     input:
-        config["paths"]["results"] + "/{method}/sampled_{domain}_genbank_genomes_unzipped/{accession}_genomic.fna"
+        fasta=config["paths"]["results"] + "/{method}/sampled_genbank_genomes_unzipped/{accession}_genomic.fna",
+        metadata=config["paths"]["results"] + "/{method}/sampled_accessions.metadata.tsv"
     output:
-        config["paths"]["results"] + "/{method}/Prokka_{domain}/{accession}/{accession}.faa"
+        config["paths"]["results"] + "/{method}/Prokka/{accession}/{accession}.faa"
     params:
-        kingdom=lambda wcs: kingdom[wcs.domain],
-        outdir=config["paths"]["results"] + "/{method}/Prokka_{domain}/{accession}"
+        accession=lambda wc: '_'.join(wc.get("accession").split('_')[0:2]),
+        full_accession="{accession}",
+        outdir=config["paths"]["results"] + "/{method}/Prokka/{accession}"
     threads:
         6
     conda:
         "../envs/prokka.yaml"
     shell:
         """
-        prokka --kingdom {params.kingdom} --outdir {params.outdir} --cpus {threads} {input} --force
+        echo {params.accession};
+        KINGDOM=$(awk -F'\\t' '$10=="{params.accession}" {{ print $3 }}' {input.metadata} | uniq);
+        echo $KINGDOM;
+        prokka --kingdom $KINGDOM --outdir {params.outdir} --prefix {params.full_accession} --cpus {threads} {input} --force
         """
 
 #rule bakta:
@@ -105,20 +134,13 @@ rule prokka:
 #    conda:
 #        "../envs/bakta.yaml"
 
-rule gather_prodigal_protein_sequences:
-    input:
-        get_genome_accessions
-    output:
-        temp(config["paths"]["results"] + '/{method}/{domain}_prodigal.faa')
-    shell:
-        "cat {input} > {output}"
 
 rule gather_protein_sequences:
     input:
-        refseq=config["paths"]["results"] + "/{method}/sampled_{domain}_refseq_proteomes/",
-        genbank=config["paths"]["results"] + "/{method}/sampled_{domain}_genbank_proteomes/"
+        refseq=config["paths"]["results"] + "/{method}/sampled_refseq_proteomes/",
+        genbank=config["paths"]["results"] + "/{method}/sampled_genbank_proteomes/"
     output:
-        temp(config["paths"]["results"] + "/{method}/sampled_{domain}.faa")
+        temp(config["paths"]["results"] + "/{method}/sampled_proteomes.faa")
     shell:
         """
         zcat {input.refseq}/* {input.genbank}/* > {output} || true
@@ -126,10 +148,8 @@ rule gather_protein_sequences:
 
 rule make_diamond_db:
     input:
-        archaea_prodigal=config["paths"]["results"] + "/{method}/ar53_prodigal.faa",
-        bacteria_prodigal=config["paths"]["results"] + "/{method}/bac120_prodigal.faa",
-        bacteria=config["paths"]["results"] + "/{method}/sampled_bac120.faa",
-        archaea=config["paths"]["results"] + "/{method}/sampled_ar53.faa"
+        annotated_proteomes=get_genome_accessions,
+        downloaded_proteomes=config["paths"]["results"] + "/{method}/sampled_proteomes.faa",
     output:
         config["paths"]["results"] + "/{method}/{method}.dmnd"
     conda:
@@ -138,5 +158,5 @@ rule make_diamond_db:
         12
     shell:
         """
-        cat {input.archaea} {input.bacteria} {input.archaea_prodigal} {input.bacteria_prodigal} | diamond makedb --db {output} -p {threads}
+        cat  {input.annotated_proteomes} {input.downloaded_proteomes} | diamond makedb --db {output} -p {threads}
         """

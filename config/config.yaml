@@ -2,13 +2,26 @@
 
 # Base path for output
 paths:
-  results: "results_test_prune"
+  results: "results_test_subsample_gtdb"
+  bakta_db: ""
 
-# Set which sampling method and database to use
+# Set which sampling method and database to use.
+# auto_download: false will give the user the possibility
+# to add or remove taxa after the sampling
 method:
-  sample_refseq: False
-  subsample_gtdb: False
-  prune_gtdb: True
+  subsample_refseq: False
+  subsample_gtdb: True
+  prune_gtdb: False
+  auto_download: True
+
+# Set what software to use for building output database
+output:
+  blast: True
+  diamond: True
+  mmseqs: True
+
+# Select software to use for annotation of accessions that miss this
+annotation_method: "Prokka"
 
 # Options for sampling the RefSeq-database
 sample_refseq:
@@ -18,11 +31,10 @@ sample_refseq:
 # Options for sampling the GTDB-database using a set number of taxa for the selected
 # taxonomical level.
 subsample_gtdb:
-  max_taxa: 1
-  taxonomic_level: "class"
+  sampling_scheme: "../config/sampling_scheme.yaml"
   completeness: 90
   contamination: 5
-  gtdb_representative: True
+  gtdb_species_representative: True
 
 # Or use phylogenetic distance from the GTDB phylogeny to trim to a set
 # number of taxa.
