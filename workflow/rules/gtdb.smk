@@ -28,7 +28,6 @@ rule subsample_gtdb:
     Use the metadata and taxonomy information to subsample the gtdb-data.
     """
     input:
-        taxonomy=config["paths"]["results"] + "/gtdb_data/taxonomy_r207.wo_suppressed_records.tsv",
         metadata=config["paths"]["results"] + "/gtdb_data/metadata_r207.wo_suppressed_records.tsv"
     output:
         config["paths"]["results"] + "/subsample_gtdb/sampled_accessions.metadata.tsv",
@@ -40,7 +39,6 @@ rule subsample_gtdb:
     shell:
         """
         python scripts/subsample_gtdb.py \
-            --gtdb-taxonomy {input.taxonomy} \
             --gtdb-metadata {input.metadata} \
             --sampling-scheme {params.sampling_scheme} \
             --completeness {params.completeness} \
@@ -55,4 +53,4 @@ rule get_sampled_accessions:
     output:
         config["paths"]["results"] + "/subsample_gtdb/sampled_accessions.txt",
     shell:
-        "cut -f10 {input} | grep -v 'Accessions' > {output}"
+        "cut -f1 {input} | grep -v 'Accessions' > {output}"

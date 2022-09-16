@@ -3,7 +3,6 @@
 # Base path for output
 paths:
   results: "results_test_subsample_gtdb"
-  bakta_db: ""
 
 # Set which sampling method and database to use.
 # auto_download: false will give the user the possibility
@@ -12,7 +11,7 @@ method:
   subsample_refseq: False
   subsample_gtdb: True
   prune_gtdb: False
-  auto_download: True
+  auto_download: False
 
 # Set what software to use for building output database
 output:
@@ -20,8 +19,6 @@ output:
   diamond: True
   mmseqs: True
 
-# Select software to use for annotation of accessions that miss this
-annotation_method: "Prokka"
 
 # Options for sampling the RefSeq-database
 sample_refseq:
@@ -31,10 +28,10 @@ sample_refseq:
 # Options for sampling the GTDB-database using a set number of taxa for the selected
 # taxonomical level.
 subsample_gtdb:
-  sampling_scheme: "../config/sampling_scheme.yaml"
-  completeness: 90
-  contamination: 5
-  gtdb_species_representative: True
+  sampling_scheme: "../config/sampling_scheme.planctomycetota.yaml"
+  completeness: 0
+  contamination: 100
+  gtdb_species_representative: False
 
 # Or use phylogenetic distance from the GTDB phylogeny to trim to a set
 # number of taxa.

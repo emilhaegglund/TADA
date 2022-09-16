@@ -42,9 +42,14 @@ def gtdb_output_files(config):
     wanted_input = []
     base_dir = config["paths"]["results"]
     if config["method"]["subsample_gtdb"]:
-        wanted_input.append(
-            os.path.join(base_dir, "subsample_gtdb", "subsample_gtdb.dmnd")
-        )
+        if config["output"]["diamond"]:
+            wanted_input.append(
+                os.path.join(base_dir, "subsample_gtdb", "subsample_gtdb.dmnd")
+            )
+        if config["output"]["blast"]:
+            wanted_input.append(
+                os.path.join(base_dir, "subsample_gtdb", "subsample_gtdb.pdb")
+            )
     elif config["method"]["prune_gtdb"]:
         wanted_input.append(os.path.join(base_dir, "prune_gtdb", "prune_gtdb.dmnd"))
 

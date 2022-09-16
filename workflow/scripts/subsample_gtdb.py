@@ -7,7 +7,7 @@ import sys
 def read_command_line():
     """Read command line arguments"""
     args = argparse.ArgumentParser()
-    args.add_argument("--gtdb-taxonomy", required=True)
+    #    args.add_argument("--gtdb-taxonomy", required=True)
     args.add_argument("--gtdb-metadata", required=True)
     args.add_argument("--sampling-scheme", required=True)
     args.add_argument("--output", required=True)
@@ -36,6 +36,7 @@ def get_taxa_level_index(taxa, taxa_levels, df):
         if taxa in df[level].to_list():
             return taxa_level_index
 
+
 args = read_command_line()
 
 # Read sampling scheme
@@ -43,31 +44,35 @@ with open(args.sampling_scheme, "r") as stream:
     sampling_scheme = yaml.safe_load(stream)
 
 # Read GTDB taxonomy
-taxa_df = pd.read_csv(
-    args.gtdb_taxonomy, sep="\t", names=["assembly_accession", "taxonomy"]
-)
-taxa_df[
-    ["domain", "phylum", "class", "order", "family", "genus", "species"]
-] = taxa_df.taxonomy.str.split(";", expand=True)
-
-taxa_df["domain"] = taxa_df["domain"].str.replace("d__", "")
-taxa_df["phylum"] = taxa_df["phylum"].str.replace("p__", "")
-taxa_df["class"] = taxa_df["class"].str.replace("c__", "")
-taxa_df["order"] = taxa_df["order"].str.replace("o__", "")
-taxa_df["family"] = taxa_df["family"].str.replace("f__", "")
-taxa_df["genus"] = taxa_df["genus"].str.replace("g__", "")
-taxa_df["species"] = taxa_df["species"].str.replace("s__", "")
+# taxa_df = pd.read_csv(
+#    args.gtdb_taxonomy, sep="\t", names=["assembly_accession", "taxonomy"]
+# )
+# taxa_df[
+#    ["domain", "phylum", "class", "order", "family", "genus", "species"]
+# ] = taxa_df.taxonomy.str.split(";", expand=True)
+#
 
 # Read GTDB metadata
-metadata_df = pd.read_csv(args.gtdb_metadata, sep="\t", low_memory=False)
+df = pd.read_csv(args.gtdb_metadata, sep="\t", low_memory=False)
+df[
+    ["domain", "phylum", "class", "order", "family", "genus", "species"]
+] = df.gtdb_taxonomy.str.split(";", expand=True)
+
+df["domain"] = df["domain"].str.replace("d__", "")
+df["phylum"] = df["phylum"].str.replace("p__", "")
+df["class"] = df["class"].str.replace("c__", "")
+df["order"] = df["order"].str.replace("o__", "")
+df["family"] = df["family"].str.replace("f__", "")
+df["genus"] = df["genus"].str.replace("g__", "")
+df["species"] = df["species"].str.replace("s__", "")
 
 # Merge the tables
-df = pd.merge(
-    left=taxa_df,
-    right=metadata_df,
-    left_on="assembly_accession",
-    right_on="accession",
-)
+# df = pd.merge(
+#    left=taxa_df,
+#    right=metadata_df,
+#    left_on="assembly_accession",
+#    right_on="accession",
+# )
 
 print(df.shape)
 # Filter based on contamination and completeness
@@ -76,7 +81,7 @@ df = df[
     & (df.checkm_completeness >= args.completeness)
 ]
 
-if args.gtdb_representative == True:
+if args.gtdb_representative:
     df = df[df.gtdb_representative == "t"]
 
 
@@ -88,11 +93,11 @@ df["accession"] = df["accession"].str.replace("RS_", "")
 taxa_levels = ["domain", "phylum", "class", "order", "family", "genus", "species"]
 sampling_order = {}  # Store sampling parameters
 
-if 'all' in sampling_scheme.keys():
+if "all" in sampling_scheme.keys():
     sampling_parameters = sampling_scheme["all"]
-    del(sampling_scheme['all'])
-    sampling_scheme['Bacteria'] = sampling_parameters
-    sampling_scheme['Archaea'] = sampling_parameters
+    del sampling_scheme["all"]
+    sampling_scheme["Bacteria"] = sampling_parameters
+    sampling_scheme["Archaea"] = sampling_parameters
 
 for taxa in sampling_scheme:
     if check_taxa_name(taxa, taxa_levels, df):
@@ -105,9 +110,7 @@ for taxa in sampling_scheme:
         if sampling_level_index >= taxa_level_index:
             # Store sampling parameters to dictionary
             if taxa_level_index in sampling_order.keys():
-                sampling_order[taxa_level_index].append(
-                    [taxa, sampling_level, n_taxa]
-                )
+                sampling_order[taxa_level_index].append([taxa, sampling_level, n_taxa])
             else:
                 sampling_order[taxa_level_index] = [[taxa, sampling_level, n_taxa]]
         else:
@@ -154,4 +157,4 @@ for taxa_level_index in sampling_order.keys():
         used_data.append(sampling_df)
 
 sampled_df = pd.concat(sampled_dfs)
-sampled_df.to_csv(args.output, sep='\t', index=False)
+sampled_df.to_csv(args.output, sep="\t", index=False)

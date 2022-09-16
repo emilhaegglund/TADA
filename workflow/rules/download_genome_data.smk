@@ -72,9 +72,9 @@ checkpoint ncbi_download_genomes:
 # Input function
 def get_genome_accessions(wildcards):
     ck_output = checkpoints.ncbi_download_genomes.get(**wildcards).output[0]
-    return expand(config["paths"]["results"] + "/{method}/{annotation}/{accession}/{accession}.faa",
+    return expand(config["paths"]["results"] + "/{method}/{annotation}/{accession}/{accession}.faa.gz",
                     method=wildcards.method,
-                    annotation=config["annotation_method"],
+                    annotation='Prokka',
                     accession=glob_wildcards(os.path.join(ck_output, "{accession}_genomic.fna.gz")).accession)
 
 def get_accession(wildcards):
@@ -88,20 +88,6 @@ rule unzip_genomes:
     shell:
         "gunzip -c {input} > {output}"
 
-#rule prodigal:
-#    input:
-#        config["paths"]["results"] + "/{method}/sampled_{domain}_genbank_genomes_unzipped/{accession}_genomic.fna"
-#    output:
-#        config["paths"]["results"] + "/{method}/prodigal_{domain}/{accession}.faa"
-#    threads:
-#        1
-#    conda:
-#        "../envs/prodigal.yaml"
-#    shell:
-#        """
-#        prodigal -i {input} -a {output} -q
-#        """
-
 rule prokka:
     input:
         fasta=config["paths"]["results"] + "/{method}/sampled_genbank_genomes_unzipped/{accession}_genomic.fna",
@@ -109,8 +95,8 @@ rule prokka:
     output:
         config["paths"]["results"] + "/{method}/Prokka/{accession}/{accession}.faa"
     params:
-        accession=lambda wc: '_'.join(wc.get("accession").split('_')[0:2]),
-        full_accession="{accession}",
+        short_accession=lambda wc: '_'.join(wc.get("accession").split('_')[0:2]),
+        accession="{accession}",
         outdir=config["paths"]["results"] + "/{method}/Prokka/{accession}"
     threads:
         6
@@ -118,38 +104,37 @@ rule prokka:
         "../envs/prokka.yaml"
     shell:
         """
-        echo {params.accession};
-        KINGDOM=$(awk -F'\\t' '$10=="{params.accession}" {{ print $3 }}' {input.metadata} | uniq);
+        echo {params.short_accession};
+        KINGDOM=$(awk -F'\\t' '$1=="{params.short_accession}" {{ print $112 }}' {input.metadata} | uniq);
         echo $KINGDOM;
-        prokka --kingdom $KINGDOM --outdir {params.outdir} --prefix {params.full_accession} --cpus {threads} {input} --force
+        prokka --kingdom $KINGDOM --outdir {params.outdir} --prefix {params.accession} --cpus {threads} {input} --force
         """
 
-#rule bakta:
-#    input:
-#        config["paths"]["results"] + "/{method}/sampled_{domain}_genbank_genomes_unzipped/{accession}_genomic.fna"
-#    output:
-#        config["paths"]["results"] + "/{method}/bakta_{domain}/{accession}.faa"
-#    threads:
-#        6
-#    conda:
-#        "../envs/bakta.yaml"
-
+rule zip_prokka:
+    input:
+        config["paths"]["results"] + "/{method}/Prokka/{accession}/{accession}.faa"
+    output:
+        config["paths"]["results"] + "/{method}/Prokka/{accession}/{accession}.faa.gz"
+    shell:
+        "gzip {input}"
 
 rule gather_protein_sequences:
     input:
+        annotation=get_genome_accessions,
         refseq=config["paths"]["results"] + "/{method}/sampled_refseq_proteomes/",
         genbank=config["paths"]["results"] + "/{method}/sampled_genbank_proteomes/"
     output:
-        temp(config["paths"]["results"] + "/{method}/sampled_proteomes.faa")
+        directory(config["paths"]["results"] + "/{method}/sampled_proteomes/")
     shell:
         """
-        zcat {input.refseq}/* {input.genbank}/* > {output} || true
+        mkdir {output};
+        mv {input.refseq}/* {input.genbank}/* {output} || true;
+        cp {input.annotation} {output} || true;
         """
 
 rule make_diamond_db:
     input:
-        annotated_proteomes=get_genome_accessions,
-        downloaded_proteomes=config["paths"]["results"] + "/{method}/sampled_proteomes.faa",
+        config["paths"]["results"] + "/{method}/sampled_proteomes/"
     output:
         config["paths"]["results"] + "/{method}/{method}.dmnd"
     conda:
@@ -158,5 +143,24 @@ rule make_diamond_db:
         12
     shell:
         """
-        cat  {input.annotated_proteomes} {input.downloaded_proteomes} | diamond makedb --db {output} -p {threads}
+        zcat {input}/* | diamond makedb --db {output} -p {threads};
         """
+
+rule make_blast_db:
+    input:
+        config["paths"]["results"] + "/{method}/sampled_proteomes/"
+    output:
+        config["paths"]["results"] + "/{method}/{method}.pdb"
+    params:
+        prefix=config["paths"]["results"] + '/{method}/{method}',
+        title="{method}"
+    conda:
+        "../envs/ncbi_blast.yaml"
+    threads:
+        12
+    shell:
+        """
+        zcat {input}/* | makeblastdb -in - -dbtype prot -out {params.prefix} -title {params.title};
+        """
+#
+#rule make_mmseqs_db:
