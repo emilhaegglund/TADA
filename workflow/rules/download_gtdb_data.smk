@@ -1,16 +1,3 @@
-rule download_gtdb_taxonomy:
-    output:
-        config["paths"]["results"] + "/gtdb_data/{domain}_taxonomy_r207.tsv"
-    params:
-        output_dir=config["paths"]["results"] + "/gtdb_data/",
-        zip_file=config["paths"]["results"] + "/gtdb_data/{domain}_taxonomy_r207.tsv.gz",
-        url="https://data.ace.uq.edu.au/public/gtdb/data/releases/release207/207.0/{domain}_taxonomy_r207.tsv.gz"
-    shell:
-        """
-        wget -P {params.output_dir} {params.url} && \
-        gunzip {params.zip_file}
-        """
-
 rule download_gtdb_metadata:
     output:
        config["paths"]["results"] + "/gtdb_data/{domain}_metadata_r207.tsv"
@@ -86,22 +73,6 @@ rule remove_suppressed_records_from_metadata:
             --output {output}
         """
 
-rule remove_suppressed_records_from_taxonomy:
-    input:
-        taxonomy=config["paths"]["results"] + "/gtdb_data/{domain}_taxonomy_r207.tsv",
-        suppressed_genbank_records=config["paths"]["results"] + "/gtdb_data/assembly_summary_genbank_historical.txt",
-        suppressed_refseq_records=config["paths"]["results"] + "/gtdb_data/assembly_summary_refseq_historical.txt"
-    output:
-        config["paths"]["results"] + "/gtdb_data/{domain}_taxonomy_r207.wo_suppressed_records.tsv",
-    shell:
-        """
-        python scripts/remove_suppressed_records_from_taxonomy.py \
-            --taxonomy {input.taxonomy} \
-            --suppressed-genbank-records {input.suppressed_genbank_records} \
-            --suppressed-refseq-records {input.suppressed_refseq_records} \
-            --output {output}
-        """
-
 rule merge_metadata_tables:
     input:
         bac_metadata=config["paths"]["results"] + "/gtdb_data/bac120_metadata_r207.wo_suppressed_records.tsv",
@@ -111,15 +82,4 @@ rule merge_metadata_tables:
     shell:
         """
         python scripts/merge_tables.py {input.bac_metadata} {input.ar_metadata} {output}
-        """
-
-rule merge_taxonomy_tables:
-    input:
-        bac_taxonomy=config["paths"]["results"] + "/gtdb_data/bac120_taxonomy_r207.wo_suppressed_records.tsv",
-        ar_taxonomy=config["paths"]["results"] + "/gtdb_data/ar53_taxonomy_r207.wo_suppressed_records.tsv"
-    output:
-        config["paths"]["results"] + "/gtdb_data/taxonomy_r207.wo_suppressed_records.tsv"
-    shell:
-        """
-        python scripts/merge_tables.py {input.bac_taxonomy} {input.ar_taxonomy} {output}
         """

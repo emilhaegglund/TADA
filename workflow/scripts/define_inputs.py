@@ -10,7 +10,6 @@ def gtdb_data_files(config):
 
     base_dir = config["paths"]["results"]
     gtdb_data_files = [
-        "taxonomy_r207.wo_suppressed_records.tsv",
         "metadata_r207.wo_suppressed_records.tsv",
         "ar53_r207.tree",
         "bac120_r207.tree",
