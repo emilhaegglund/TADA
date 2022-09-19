@@ -35,5 +35,7 @@ if config["subsample_gtdb"]["gtdb_species_representative"]:
     config["subsample_gtdb"]["gtdb_species_representative"] = "--gtdb_representative"
 else:
     config["subsample_gtdb"]["gtdb_representative"] = ""
+
+
 rule all:
     input: all_input

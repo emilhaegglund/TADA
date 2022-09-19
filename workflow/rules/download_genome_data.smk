@@ -132,9 +132,40 @@ rule gather_protein_sequences:
         cp {input.annotation} {output} || true;
         """
 
+rule prepare_taxonomy_files:
+    input:
+        config["paths"]["results"] + "/{method}/sampled_accessions.metadata.tsv"
+    output:
+        names=config["paths"]["results"] + "/{method}/sampled_proteins/taxonomy_data/names.dmp",
+        nodes=config["paths"]["results"] + "/{method}/sampled_proteins/taxonomy_data/nodes.dmp",
+        taxonmap=config["paths"]["results"] + "/{method}/sampled_proteins/taxonomy_data/taxid.map"
+    shell:
+        """
+        python scripts/create_taxon_data.py --metadata {input} \
+            --out-nodes {output.nodes} \
+            --out-names {output.names} \
+            --out-taxid {output.taxonmap}
+        """
+
+rule create_protein_to_taxa_map:
+    input:
+        taxonmap=config["paths"]["results"] + "/{method}/sampled_proteins/taxonomy_data/taxid.map",
+        proteomes=config["paths"]["results"] + "/{method}/sampled_proteomes/"
+    output:
+        config["paths"]["results"] + "/{method}/sampled_proteins/taxonomy_data/prot2taxid.map"
+    conda:
+        "../envs/biopython.yaml"
+    shell:
+        """
+        python scripts/create_taxonmap.py {input.taxonmap} {input.proteomes} {output}
+        """
+
 rule make_diamond_db:
     input:
-        config["paths"]["results"] + "/{method}/sampled_proteomes/"
+        proteomes=config["paths"]["results"] + "/{method}/sampled_proteomes/",
+        names=config["paths"]["results"] + "/{method}/sampled_proteins/taxonomy_data/names.dmp",
+        nodes=config["paths"]["results"] + "/{method}/sampled_proteins/taxonomy_data/nodes.dmp",
+        taxonmap=config["paths"]["results"] + "/{method}/sampled_proteins/taxonomy_data/prot2taxid.map"
     output:
         config["paths"]["results"] + "/{method}/{method}.dmnd"
     conda:
@@ -143,7 +174,7 @@ rule make_diamond_db:
         12
     shell:
         """
-        zcat {input}/* | diamond makedb --db {output} -p {threads};
+        zcat {input.proteomes}/* | diamond makedb --db {output} -p {threads} --taxonnames {input.names} --taxonnodes {input.nodes} --taxonmap {input.taxonmap}
         """
 
 rule make_blast_db:
@@ -156,11 +187,19 @@ rule make_blast_db:
         title="{method}"
     conda:
         "../envs/ncbi_blast.yaml"
-    threads:
-        12
     shell:
         """
         zcat {input}/* | makeblastdb -in - -dbtype prot -out {params.prefix} -title {params.title};
         """
-#
 #rule make_mmseqs_db:
+#    input:
+#
+#    output
+#
+#    params:
+#
+#    conda:
+#
+#    threads:
+#
+#    shell:
