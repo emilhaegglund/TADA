@@ -1,6 +1,3 @@
-Brocadiae:
-  sampling_level: species
-  taxa: 1
 Planctomycetota:
   sampling_level: order
-  taxa: 10
+  taxa: 1

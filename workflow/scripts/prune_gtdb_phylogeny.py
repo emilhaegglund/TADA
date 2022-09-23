@@ -11,8 +11,7 @@ def parse_command_line():
     args.add_argument("--phylogeny", required=True)
     args.add_argument("--gtdb-metadata", required=True)
     args.add_argument("--taxa", required=True, type=int)
-    args.add_argument("--output-refseq", required=True)
-    args.add_argument("--output-genbank", required=True)
+    args.add_argument("--output-metadata", required=True)
     args.add_argument("--completeness", type=float, default=0)
     args.add_argument("--contamination", type=float, default=100)
     return args.parse_args()
@@ -33,6 +32,17 @@ tree = Tree(args.phylogeny, format=1, quoted_node_names=True)
 
 # First prune taxa from tree according to filter
 df = pd.read_csv(args.gtdb_metadata, sep="\t")
+df[
+    ["domain", "phylum", "class", "order", "family", "genus", "species"]
+] = df.gtdb_taxonomy.str.split(";", expand=True)
+
+df["domain"] = df["domain"].str.replace("d__", "")
+df["phylum"] = df["phylum"].str.replace("p__", "")
+df["class"] = df["class"].str.replace("c__", "")
+df["order"] = df["order"].str.replace("o__", "")
+df["family"] = df["family"].str.replace("f__", "")
+df["genus"] = df["genus"].str.replace("g__", "")
+df["species"] = df["species"].str.replace("s__", "")
 
 df = df[df['accession'].isin(tree.get_leaf_names())]
 print(df.shape)
@@ -106,8 +116,5 @@ leafs = tree.get_leaf_names()
 df = df[df["accession"].isin(leafs)]
 df["accession"] = df["accession"].str.replace("GB_", "")
 df["accession"] = df["accession"].str.replace("RS_", "")
-sampled_df_genbank = df[df["accession"].str.contains("GCA")]
-sampled_df_refseq = df[df["accession"].str.contains("GCF")]
-sampled_df_refseq["accession"].to_csv(args.output_refseq, sep="\t", index=False)
-sampled_df_genbank["accession"].to_csv(args.output_genbank, sep="\t", index=False)
+df.to_csv(args.output_metadata, sep="\t", index=False)
 

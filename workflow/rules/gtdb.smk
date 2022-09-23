@@ -1,10 +1,9 @@
 rule prune_gtdb_phylogeny:
     input:
-        phylogeny=config["paths"]["results"] + "/gtdb_data/{domain}_r207.tree",
-        metadata=config["paths"]["results"] + "/gtdb_data/{domain}_metadata_r207.wo_suppressed_records.tsv"
+        phylogeny=config["base_dir"] + "/gtdb_data/{domain}_r207.tree",
+        metadata=config["base_dir"] + "/gtdb_data/{domain}_metadata_r207.wo_suppressed_records.tsv"
     output:
-        refseq=config["paths"]["results"] + "/prune_gtdb/sampled_{domain}_refseq_accessions.tsv",
-        genbank=config["paths"]["results"] + "/prune_gtdb/sampled_{domain}_genbank_accessions.tsv",
+        metadata=config["base_dir"] + "/{prefix}.prune_gtdb.{domain}.metadata.tsv"
     params:
         taxa=lambda wildcards: config["prune_gtdb"]["{}".format(wildcards.domain)],
         completeness=config["prune_gtdb"]["completeness"],
@@ -15,12 +14,22 @@ rule prune_gtdb_phylogeny:
         """
         python scripts/prune_gtdb_phylogeny.py \
             --phylogeny {input.phylogeny} \
-            --taxa {params.taxa} \
             --gtdb-metadata {input.metadata} \
+            --taxa {params.taxa} \
             --completeness {params.completeness} \
             --contamination {params.contamination} \
-            --output-refseq {output.refseq} \
-            --output-genbank {output.genbank}
+            --output-metadata {output.metadata} \
+        """
+
+rule merge_prune_gtdb_output:
+    input:
+        bacteria_metadata=config["base_dir"] + "/{prefix}.prune_gtdb.bac120.metadata.tsv",
+        archaea_metadata=config["base_dir"] + "/{prefix}.prune_gtdb.ar53.metadata.tsv"
+    output:
+        config["base_dir"] + "/{prefix}.prune_gtdb.metadata.tsv"
+    shell:
+        """
+        python scripts/merge_tables.py {input.bacteria_metadata} {input.archaea_metadata} {output}
         """
 
 rule subsample_gtdb:
@@ -28,14 +37,14 @@ rule subsample_gtdb:
     Use the metadata and taxonomy information to subsample the gtdb-data.
     """
     input:
-        metadata=config["paths"]["results"] + "/gtdb_data/metadata_r207.wo_suppressed_records.tsv"
+        metadata=config["base_dir"] + "/gtdb_data/metadata_r207.wo_suppressed_records.tsv"
     output:
-        config["paths"]["results"] + "/subsample_gtdb/sampled_accessions.metadata.tsv",
+        config["base_dir"] + "/{prefix}.sample_gtdb.metadata.tsv"
     params:
-        sampling_scheme=config["subsample_gtdb"]["sampling_scheme"],
-        completeness=config["subsample_gtdb"]["completeness"],
-        contamination=config["subsample_gtdb"]["contamination"],
-        gtdb_representative=config["subsample_gtdb"]["gtdb_species_representative"]
+        sampling_scheme=config["sample_gtdb"]["sampling_scheme"],
+        completeness=config["sample_gtdb"]["completeness"],
+        contamination=config["sample_gtdb"]["contamination"],
+        gtdb_representative=config["sample_gtdb"]["gtdb_species_representative"]
     shell:
         """
         python scripts/subsample_gtdb.py \
@@ -46,11 +55,3 @@ rule subsample_gtdb:
             --gtdb-representative {params.gtdb_representative} \
             --output {output}
         """
-
-rule get_sampled_accessions:
-    input:
-        config["paths"]["results"] + "/subsample_gtdb/sampled_accessions.metadata.tsv",
-    output:
-        config["paths"]["results"] + "/subsample_gtdb/sampled_accessions.txt",
-    shell:
-        "cut -f1 {input} | grep -v 'Accessions' > {output}"

@@ -43,15 +43,6 @@ args = read_command_line()
 with open(args.sampling_scheme, "r") as stream:
     sampling_scheme = yaml.safe_load(stream)
 
-# Read GTDB taxonomy
-# taxa_df = pd.read_csv(
-#    args.gtdb_taxonomy, sep="\t", names=["assembly_accession", "taxonomy"]
-# )
-# taxa_df[
-#    ["domain", "phylum", "class", "order", "family", "genus", "species"]
-# ] = taxa_df.taxonomy.str.split(";", expand=True)
-#
-
 # Read GTDB metadata
 df = pd.read_csv(args.gtdb_metadata, sep="\t", low_memory=False)
 df[
@@ -66,13 +57,6 @@ df["family"] = df["family"].str.replace("f__", "")
 df["genus"] = df["genus"].str.replace("g__", "")
 df["species"] = df["species"].str.replace("s__", "")
 
-# Merge the tables
-# df = pd.merge(
-#    left=taxa_df,
-#    right=metadata_df,
-#    left_on="assembly_accession",
-#    right_on="accession",
-# )
 
 print(df.shape)
 # Filter based on contamination and completeness

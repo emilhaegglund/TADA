@@ -1,0 +1,57 @@
+$schema: "https://json-schema.org/draft-06/schema#"
+description: Validation schema for config-file
+
+properties:
+  base_dir:
+    type: string
+    description: name of output directory
+    default: "results"
+  prefix:
+    type: string
+    description: name of directory with sampled proteomes and prefix name of databases
+    default: "sampled_proteomes"
+  method:
+    type: string
+    enum: ["sample_gtdb", "sample_refseq", "prune_gtdb"]
+    description: which version of the workflow to run
+  download:
+    type: boolean
+    default: True
+    description: set to false if the workflow should stop after sampling
+
+  sample_gtdb:
+    properties:
+      sampling_scheme:
+        type: string
+        description: path to sampling scheme
+      completeness:
+        type: number
+        description: remove entries with a completeness estimated lower than given value
+      contamination:
+        type: number
+        description: remove entries with a contamination higher than given value
+      gtdb_species_representatives:
+        type: boolean
+        description: keep only entries that are classified as species representetives
+
+
+  sample_refseq:
+    properties:
+      sampling_scheme:
+        type: string
+        description: path to sampling scheme
+
+  prune_gtdb:
+    properties:
+      bac120:
+        type: integer
+        description: prune bacterial gtdb-phylogeny until this number of species is remaining
+      ar53:
+        type: integer
+        description: prune archaeal gtdb-phylogeny until this number of species is remaining
+      completeness:
+        type: number
+        description: remove entries with a completeness estimated lower than given value
+      contamination:
+        type: number
+        description: remove entries with a contamination higher than given value

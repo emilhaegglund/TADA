@@ -1,40 +1,40 @@
-# Config file to build blast database based on taxonomical sampling
+# Config file to sample sequence databases
 
-# Base path for output
-paths:
-  results: "results_test_subsample_gtdb"
+# Base path for output directory
+base_dir: "results_test_prune"
+
+# Name of output-folder with proteomes and
+# databases
+prefix: "planctomycetota"
 
 # Set which sampling method and database to use.
 # auto_download: false will give the user the possibility
 # to add or remove taxa after the sampling
-method:
-  subsample_refseq: False
-  subsample_gtdb: True
-  prune_gtdb: False
-  auto_download: False
+method: "prune_gtdb"
 
-# Set what software to use for building output database
+# Will not download any proteomes if set to False
+download: False
+
+# Set what software to use for building output database.
+# If all option are set to false it will stop with a
+# directory containing all proteomes.
 output:
-  blast: True
+  blast: False
   diamond: True
-  mmseqs: True
 
 
-# Options for sampling the RefSeq-database
+# Options for sampling the RefSeq-database.
 sample_refseq:
-    max_taxa: 1
-    taxonomic_level: "phylum"
-
-# Options for sampling the GTDB-database using a set number of taxa for the selected
-# taxonomical level.
-subsample_gtdb:
   sampling_scheme: "../config/sampling_scheme.planctomycetota.yaml"
-  completeness: 0
-  contamination: 100
+
+# Options for sampling the GTDB-database.
+sample_gtdb:
+  sampling_scheme: "../config/sampling_scheme.planctomycetota.yaml"
+  completeness: 90
+  contamination: 5
   gtdb_species_representative: False
 
-# Or use phylogenetic distance from the GTDB phylogeny to trim to a set
-# number of taxa.
+# Options for sampling the GTDB-database
 prune_gtdb:
   bac120: 100
   ar53: 20
