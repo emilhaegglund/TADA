@@ -7,6 +7,7 @@ include: "rules/gtdb.smk"
 include: "rules/download_genome_data.smk"
 include: "rules/refseq.smk"
 
+
 def all_input(wildcards):
     """
     Generate all inputs for the rule all
@@ -22,6 +23,11 @@ def all_input(wildcards):
             wanted_input.append(os.path.join(base_dir, config["prefix"] + "." + config["method"] + ".pdb"))
     else:
         wanted_input.append(os.path.join(base_dir, config["prefix"] + "." + config["method"] + ".sampled_accessions.txt"))
+    if config["method"] == "prune_gtdb":
+        wanted_input.append(os.path.join(base_dir, config["prefix"] + "." + config["method"] + ".bac120.nwk"))
+        wanted_input.append(os.path.join(base_dir, config["prefix"] + "." + config["method"] + ".ar53.nwk"))
+
+
 
 
 
@@ -29,12 +35,6 @@ def all_input(wildcards):
     return wanted_input
 
 validate(config, schema="validation_schemes/config.schema.yaml")
-
-if config["sample_gtdb"]["gtdb_species_representative"]:
-    config["sample_gtdb"]["gtdb_species_representative"] = "--gtdb_representative"
-else:
-    config["sample_gtdb"]["gtdb_representative"] = ""
-
 
 rule all:
     input: all_input

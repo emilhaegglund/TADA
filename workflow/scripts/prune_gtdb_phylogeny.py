@@ -12,6 +12,7 @@ def parse_command_line():
     args.add_argument("--gtdb-metadata", required=True)
     args.add_argument("--taxa", required=True, type=int)
     args.add_argument("--output-metadata", required=True)
+    args.add_argument("--output-tree", required=True)
     args.add_argument("--completeness", type=float, default=0)
     args.add_argument("--contamination", type=float, default=100)
     return args.parse_args()
@@ -117,4 +118,5 @@ df = df[df["accession"].isin(leafs)]
 df["accession"] = df["accession"].str.replace("GB_", "")
 df["accession"] = df["accession"].str.replace("RS_", "")
 df.to_csv(args.output_metadata, sep="\t", index=False)
+tree.write(outfile=args.output_tree)
 
