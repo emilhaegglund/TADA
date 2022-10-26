@@ -7,13 +7,12 @@ import sys
 def read_command_line():
     """Read command line arguments"""
     args = argparse.ArgumentParser()
-    #    args.add_argument("--gtdb-taxonomy", required=True)
     args.add_argument("--gtdb-metadata", required=True)
     args.add_argument("--sampling-scheme", required=True)
     args.add_argument("--output", required=True)
     args.add_argument("--completeness", type=float, default=0)
     args.add_argument("--contamination", type=float, default=100)
-    args.add_argument("--gtdb-representative")
+    args.add_argument("--gtdb-representative", action="store_true")
 
     return args.parse_args()
 
@@ -58,13 +57,13 @@ df["genus"] = df["genus"].str.replace("g__", "")
 df["species"] = df["species"].str.replace("s__", "")
 
 
-print(df.shape)
 # Filter based on contamination and completeness
 df = df[
     (df.checkm_contamination <= args.contamination)
     & (df.checkm_completeness >= args.completeness)
 ]
 
+# Keep only GTDB-species representatives
 if args.gtdb_representative:
     df = df[df.gtdb_representative == "t"]
 
@@ -100,8 +99,7 @@ for taxa in sampling_scheme:
         else:
             sys.exit("Can't sample from a higher taxonomic level")
     else:
-        print(taxa)
-        sys.exit("{taxa} is not present in GTDB")
+        sys.exit(f"{taxa} is not present in GTDB")
 
 # Reorder the sampling dictionary so tha we start sampling from species level and the continue
 # with higher levels
@@ -110,7 +108,6 @@ sampling_order = {
 }
 sampled_dfs = []  # Store sampled records
 used_data = []  # Store data that has already been used to sample from.
-print(sampling_order)
 for taxa_level_index in sampling_order.keys():
     taxa_level = taxa_levels[taxa_level_index]
     for sampling in sampling_order[taxa_level_index]:
@@ -123,22 +120,45 @@ for taxa_level_index in sampling_order.keys():
         sampling_df = df[df[taxa_level] == taxa]
 
         # Remove data that has already been used to sample fromh
+        exclude_entries = []
         for used_df in used_data:
-            sampling_df = pd.concat([sampling_df, used_df]).drop_duplicates(keep=False)
+            exclude_entries += used_df["accession"].to_list()
+        sampling_df = sampling_df[~sampling_df["accession"].isin(exclude_entries)]
+
+
+        # Find level under sampling level
+        if sampling_level != 'species':
+            index = taxa_levels.index(sampling_level)
+            index += 1
+            base_level = taxa_levels[index]
+            n_units = len(set(sampling_df[base_level].to_list()))
+            prob_units = 1 / n_units
+            dfs = []
+            # Assign sampling probabilities to each taxa
+            for i, taxa_level_df in sampling_df.groupby(base_level):
+                n_base_level_taxa = taxa_level_df.shape[0]
+                prob_base_level_taxa = prob_units / n_base_level_taxa
+                taxa_level_df["sampling_prob"] = prob_base_level_taxa
+                dfs.append(taxa_level_df)
+            sampling_df = pd.concat(dfs)
 
         # Group the sampling dataframe based on the sampling level
         for i, taxa_level_df in sampling_df.groupby(sampling_level):
-
             # Can't take a sample if the sample size we ask for is larger than
             # the number of taxa in that group. In that case, use all taxa in
             # the group.
             if taxa_level_df.shape[0] > n_taxa:
-                sampled_dfs.append(taxa_level_df.sample(n_taxa))
+                if "sampling_prob" in taxa_level_df.columns:
+                    sampled_df =  taxa_level_df.sample(n=n_taxa, weights="sampling_prob")
+                    sampled_dfs.append(sampled_df)
+                else:
+                    sampled_df = taxa_level_df.sample(n_taxa)
+                    sampled_dfs.append(sampled_df)
             else:
                 sampled_dfs.append(taxa_level_df)
-
         # Finally, add the sampling dataframe to used data
         used_data.append(sampling_df)
 
 sampled_df = pd.concat(sampled_dfs)
+sampled_df.drop_duplicates(inplace=True)
 sampled_df.to_csv(args.output, sep="\t", index=False)

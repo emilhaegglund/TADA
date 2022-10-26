@@ -1,9 +1,16 @@
+if config["sample_gtdb"]["gtdb_species_representative"]:
+    config["sample_gtdb"]["gtdb_species_representative_opt"] = "--gtdb-representative"
+else:
+    config["sample_gtdb"]["gtdb_species_representative_opt"] = ""
+
 rule prune_gtdb_phylogeny:
     input:
         phylogeny=config["base_dir"] + "/gtdb_data/{domain}_r207.tree",
         metadata=config["base_dir"] + "/gtdb_data/{domain}_metadata_r207.wo_suppressed_records.tsv"
     output:
-        metadata=config["base_dir"] + "/{prefix}.prune_gtdb.{domain}.metadata.tsv"
+        metadata=config["base_dir"] + "/{prefix}.prune_gtdb.{domain}.metadata.tsv",
+        tree=config["base_dir"] + "/{prefix}.prune_gtdb.{domain}.nwk"
+
     params:
         taxa=lambda wildcards: config["prune_gtdb"]["{}".format(wildcards.domain)],
         completeness=config["prune_gtdb"]["completeness"],
@@ -19,6 +26,7 @@ rule prune_gtdb_phylogeny:
             --completeness {params.completeness} \
             --contamination {params.contamination} \
             --output-metadata {output.metadata} \
+            --output-tree {output.tree} \
         """
 
 rule merge_prune_gtdb_output:
@@ -44,7 +52,7 @@ rule subsample_gtdb:
         sampling_scheme=config["sample_gtdb"]["sampling_scheme"],
         completeness=config["sample_gtdb"]["completeness"],
         contamination=config["sample_gtdb"]["contamination"],
-        gtdb_representative=config["sample_gtdb"]["gtdb_species_representative"]
+        gtdb_representative=config["sample_gtdb"]["gtdb_species_representative_opt"]
     shell:
         """
         python scripts/subsample_gtdb.py \
