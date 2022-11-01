@@ -1,19 +1,19 @@
 # Config file to sample sequence databases
 
 # Base path for output directory
-base_dir: "results_test_prune"
+base_dir: "sdbw"
 
 # Name of output-folder with proteomes and
 # databases
-prefix: "planctomycetota"
+prefix: "sdbw"
 
 # Set which sampling method and database to use.
 # auto_download: false will give the user the possibility
 # to add or remove taxa after the sampling
-method: "prune_gtdb"
+method: "sample_gtdb"
 
 # Will not download any proteomes if set to False
-download: False
+download: True
 
 # Set what software to use for building output database.
 # If all option are set to false it will stop with a
@@ -22,21 +22,20 @@ output:
   blast: False
   diamond: True
 
-
 # Options for sampling the RefSeq-database.
 sample_refseq:
   sampling_scheme: "../config/sampling_scheme.planctomycetota.yaml"
 
 # Options for sampling the GTDB-database.
 sample_gtdb:
-  sampling_scheme: "../config/sampling_scheme.planctomycetota.yaml"
+  sampling_scheme: "../config/sampling_scheme.bartonella.yaml"
   completeness: 90
   contamination: 5
-  gtdb_species_representative: False
+  gtdb_species_representative: True
 
 # Options for sampling the GTDB-database
 prune_gtdb:
-  bac120: 100
-  ar53: 20
+  bac120: 1000
+  ar53: 200
   completeness: 90
   contamination: 5
