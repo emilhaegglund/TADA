@@ -137,6 +137,8 @@ rule gather_protein_sequences:
         mkdir {output};
         mv {input.refseq}/* {input.genbank}/* {output} || true;
         cp {input.annotation} {output} || true;
+        rm -rf {input.refseq};
+        rm -rf {input.genbank};
         """
 
 rule prepare_taxonomy_files:
@@ -174,41 +176,29 @@ rule make_diamond_db:
         #nodes=config["base_dir"] + "/taxonomy_data/nodes.dmp",
         #taxonmap=config["base_dir"] + "/taxonomy_data/prot2taxid.map"
     output:
-        config["base_dir"] + "/{prefix}.{method}.dmnd"
+        config["base_dir"] + "/diamond_db/{prefix}.{method}.dmnd"
     conda:
         "../envs/diamond.yaml"
     threads:
         12
     shell:
         """
-        zcat {input.proteomes}/* | diamond makedb --db {output} -p {threads}
+        gunzip -c {input.proteomes}/* | diamond makedb --db {output} -p {threads}
         """
         #--taxonnames {input.names} --taxonnodes {input.nodes} --taxonmap {input.taxonmap}
 
 
 rule make_blast_db:
     input:
-        config["base_dir"] + "/{prefix}_{method}_proteomes/"
+        config["base_dir"] + "/{prefix}.{method}.proteomes/"
     output:
-        config["base_dir"] + "/{prefix}.{method}.pdb"
+        config["base_dir"] + "/ncbi_blastp_db/{prefix}.{method}.pdb"
     params:
-        prefix=config["base_dir"] + "/{prefix}.{method}",
+        prefix=config["base_dir"] + "/ncbi_blastp_db/{prefix}.{method}",
         title="{prefix}.{method}"
     conda:
         "../envs/ncbi_blast.yaml"
     shell:
         """
-        zcat {input}/* | makeblastdb -in - -dbtype prot -out {params.prefix} -title {params.title};
+        gunzip -c {input}/* | makeblastdb -in - -dbtype prot -out {params.prefix} -title {params.title};
         """
-#rule make_mmseqs_db:
-#    input:
-#
-#    output
-#
-#    params:
-#
-#    conda:
-#
-#    threads:
-#
-#    shell:

@@ -18,9 +18,9 @@ def all_input(wildcards):
     if config["download"]:
         wanted_input.append(os.path.join(base_dir, config["prefix"] + "." + config["method"] + ".proteomes"))
         if config["output"]["diamond"]:
-            wanted_input.append(os.path.join(base_dir, config["prefix"] + "." + config["method"] + ".dmnd"))
+            wanted_input.append(os.path.join(base_dir, 'diamond_db', config["prefix"] + "." + config["method"] + ".dmnd"))
         if config["output"]["blast"]:
-            wanted_input.append(os.path.join(base_dir, config["prefix"] + "." + config["method"] + ".pdb"))
+            wanted_input.append(os.path.join(base_dir, 'ncbi_blastp_db', config["prefix"] + "." + config["method"] + ".pdb"))
     else:
         wanted_input.append(os.path.join(base_dir, config["prefix"] + "." + config["method"] + ".sampled_accessions.txt"))
     if config["method"] == "prune_gtdb":
