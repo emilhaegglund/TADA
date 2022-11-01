@@ -8,7 +8,7 @@ git clone https://github.com/emilhaegglund/SDBW.git
 ```
 The next step is to install and activate a conda environment from which the workflow will be run. This will install Mamba and Snakemake.
 ```
-conda env create -f environment.yml
+conda env create -f environment.yaml
 conda activate sdbw
 ```
 
@@ -23,16 +23,16 @@ The first option is to set the path to the output-directory:
 ```
 base_dir: "results"
 ```
-And we can also set the prefix of the proteome-directory and blast-databases.
+To set the prefix of the proteome-directory and blast-databases.
 ```
 prefix: "sdbw"
 ```
 
 ### Sampling methods
 The workflow can be run using three different methods:
-1. Use the NCBI Taxonomy to subsample the RefSeq database.
-2. Subsample based on the GTDB Taxonomy.
-3. Subsampling based on evolutionary distance between taxa. This is done by pruning the phylogenies from GTDB.
+1. Sampling of RefSeq using the NCBI Taxonomy.
+2. Sampling based on the GTDB Taxonomy.
+3. Sampling based on evolutionary distance between taxa. This is done by pruning the phylogenies from GTDB.
 
 The main differences between the methods is that RefSeq will also include Eukaryotes, while GTDB is limited to Bacteria and Archaea. Sampling GTDB can also be combined with filtering on a number of metadata associated with each entry. Use one of the  `sample_refseq`, `sample_gtdb`, `prune_gtdb`
 ```
@@ -40,12 +40,17 @@ method: "sample_gtdb"
 ```
 
 ### Select ouput
-Next we have to define the output. Here we can choose between building a blast database for either NCBI BlastP, Diamond or MMSeqs. If we set all to false, the workflow will stop after the proteomes for each taxa have been obtained.
+The final output of the workflow is a Blast-database. Here either a NCBI BlastP or Diamond database can be constructed. If we set all to false, the workflow will stop after the proteomes for each taxa have been obtained.
 The default is to create a Diamond-database.
 ```
 output:
     blast: False
     diamond: True
+```
+
+The workflow can also be stopped after the samping step by setting
+```
+download: False
 ```
 
 ### GTDB
