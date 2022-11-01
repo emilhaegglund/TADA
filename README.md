@@ -21,34 +21,32 @@ specify the location in the `--configfile` option when running snakemake.
 
 The first option is to set the path to the output-directory:
 ```
-path:
-  results: "results"
+base_dir: "results"
 ```
-Next we have to define the output. Here we can choose between building a blast database for either NCBI BlastP, Diamond or MMSeqs. If we set all to false, the workflow will stop after the proteomes for each taxa have been obtained.
-The default is to create a Diamond-database.
+And we can also set the prefix of the proteome-directory and blast-databases.
 ```
-output:
-    ncbi_blastp: False
-    diamond: True
-    mmseqs: False
+prefix: "sdbw"
 ```
 
+### Sampling methods
 The workflow can be run using three different methods:
 1. Use the NCBI Taxonomy to subsample the RefSeq database.
 2. Subsample based on the GTDB Taxonomy.
 3. Subsampling based on evolutionary distance between taxa. This is done by pruning the phylogenies from GTDB.
 
-The main differences between the methods is that RefSeq will also include Eukaryotes, while GTDB is limited to Bacteria and Archaea. Sampling GTDB can also be combined with filtering on a number of metadata associated with each entry.
-To determine the methods to use change the following lines in the config-file. One can run with several methods, the result of each method will be placed in differnt directories.
+The main differences between the methods is that RefSeq will also include Eukaryotes, while GTDB is limited to Bacteria and Archaea. Sampling GTDB can also be combined with filtering on a number of metadata associated with each entry. Use one of the  `sample_refseq`, `sample_gtdb`, `prune_gtdb`
 ```
-method:
-  subsample_refseq: False
-  subsample_gtdb: True
-  prune_gtdb: False
+method: "sample_gtdb"
 ```
-### Options for sampling RefSeq
 
-__TODO__: Not implemented yet.
+### Select ouput
+Next we have to define the output. Here we can choose between building a blast database for either NCBI BlastP, Diamond or MMSeqs. If we set all to false, the workflow will stop after the proteomes for each taxa have been obtained.
+The default is to create a Diamond-database.
+```
+output:
+    blast: False
+    diamond: True
+```
 
 ### GTDB
 Sampling from GTDB uses the latest release r207. Before any subsampling is done, records that have been suppressed from RefSeq falls back to the corresponding GenBank record. Records that have been suppressed from GenBank is removed from the metadata-files from GTDB and will be excluded from the sampling.
@@ -56,7 +54,7 @@ The GTDB-database comes with a large collection of metadata associated with each
 
 ### Options for subsampling of GTDB
 ```
-subsample_gtdb:
+sample_gtdb:
     sampling_scheme: <path>
     completeness: <int>
     contamination: <int>
@@ -81,10 +79,6 @@ subsample_gtdb:
 ### Option for pruning the GTDB-phylogeny
 GTDB contains one phylogeny for bacteria and one for archaea. SDBW will prune the phylogenies based on the phylogenetic distance between taxa, until the phylogeny contains the number of taxa as defined in the config file.
 Before the distance-based pruning we can also use the `completeness` and `contamination` options to first remove taxa that does not fullfill this criteria.
-
-__Alternative method 1:__ Only define the number of bacteria, and start trimming this phylogeny. Save the evolutionary distance for the last trimmed leaf-pair and then trim the Archaeal tree until we reach the same phylogenetic distance.
-
-__Alternative method 2:__ Just give the total number of taxa to retain, then trim both the bacteria and archaea phylogny in parallel, can be a bit more technical to achieve.
 ```
 prune_gtdb:
   bac120: 1000
@@ -94,10 +88,12 @@ prune_gtdb:
 ```
 The above example will prune all taxa that has a completeness of less than 90% and a contamination over 5%, then it will continue to prune the bacterial phylogeny untill 1000 taxa remains, and the archaeal phylogeny untill 200 taxa remains.
 
-In some cases the Genbank entries does not contain annotation. For these cases the nucleotide sequence will be downloaded and annotated. The default method for the annotation is Prokka. However, the workflow also supports Bakta for annotation. This require installation of the BaktaDB according to instructions found [here](https://github.com/oschwengers/bakta#installation) and changing the line `annotation_software: Prokka` to `annotation_software: Bakta` and adding the path to the BaktaDB to the following `baktadb: <path>` in the config-file.
-
-### Manually add entries after sampling
-In cases where you would like to also manually add entries after the sampling has been done you can set the `auto_download` option to `False`
+### Options for sampling RefSeq
+The only option specific for sampling refseq is giving the path to a sampling file.
+```
+sample_refseq:
+    sampling_scheme: <path>
+```
 
 ### Defining a sampling scheme
 The subsampling of Refseq or GTDB is based on a sampling scheme that is defined in a YAML-file with the following structure. Some examples of sampling schemes can be found in the config-directory.
