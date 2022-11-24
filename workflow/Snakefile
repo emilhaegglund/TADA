@@ -27,13 +27,9 @@ def all_input(wildcards):
         wanted_input.append(os.path.join(base_dir, config["prefix"] + "." + config["method"] + ".bac120.nwk"))
         wanted_input.append(os.path.join(base_dir, config["prefix"] + "." + config["method"] + ".ar53.nwk"))
 
-
-
-
-
-
     return wanted_input
 
+# Validate config-file
 validate(config, schema="validation_schemes/config.schema.yaml")
 
 rule all:

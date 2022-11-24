@@ -147,7 +147,11 @@ for taxa_level_index in sampling_order.keys():
             # Can't take a sample if the sample size we ask for is larger than
             # the number of taxa in that group. In that case, use all taxa in
             # the group.
-            if taxa_level_df.shape[0] > n_taxa:
+            if n_taxa == 0:
+                print("get all")
+                print(taxa_level_df)
+                sampled_dfs.append(taxa_level_df)
+            elif taxa_level_df.shape[0] > n_taxa:
                 if "sampling_prob" in taxa_level_df.columns:
                     sampled_df =  taxa_level_df.sample(n=n_taxa, weights="sampling_prob")
                     sampled_dfs.append(sampled_df)

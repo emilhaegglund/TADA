@@ -60,6 +60,6 @@ rule subsample_gtdb:
             --sampling-scheme {params.sampling_scheme} \
             --completeness {params.completeness} \
             --contamination {params.contamination} \
-            --gtdb-representative {params.gtdb_representative} \
+            {params.gtdb_representative} \
             --output {output}
         """
