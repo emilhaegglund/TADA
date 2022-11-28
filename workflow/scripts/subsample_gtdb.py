@@ -67,7 +67,6 @@ df = df[
 if args.gtdb_representative:
     df = df[df.gtdb_representative == "t"]
 
-
 # Remove accession prefix
 df["accession"] = df["accession"].str.replace("GB_", "")
 df["accession"] = df["accession"].str.replace("RS_", "")
