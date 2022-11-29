@@ -1,3 +1,37 @@
+TAXA = []
+if config["method"] == "sample_refseq":
+    with open(config["sample_refseq"]["sampling_scheme"], "r") as stream:
+        sampling_scheme = yaml.safe_load(stream)
+    for taxa in sampling_scheme.keys():
+        TAXA.append(taxa.replace(" ", "_"))
+rule download_summary:
+    """
+    Use t
+    """
+    output:
+        config["base_dir"] + "/ncbi_data/{taxa}.tsv"
+    conda:
+        "../envs/ncbi-datasets.yaml"
+    shell:
+        """
+        taxa=$(echo {wildcards.taxa} | sed -e "s/_/ /");
+        taxa_new="'$taxa'";
+        datasets summary genome taxon "$taxa_new" --as-json-lines | \
+        dataformat tsv genome > {output};
+        """
+
+rule merge_genome_summary:
+    """
+    Merge the genome summary files into a single tsv table
+    """
+    input:
+        expand(config["base_dir"] + "/ncbi_data/{taxa}.tsv", taxa=TAXA)
+    output:
+        config["base_dir"] + "/ncbi_data/datasets.tsv"
+    shell:
+        "python scripts/merge_datasets.py {input} {output}"
+
+
 rule download_assembly_summary:
     output:
         config["base_dir"] + "/ncbi_data/assembly_summary_refseq.txt"
