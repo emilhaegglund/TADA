@@ -21,7 +21,7 @@ rule download_summary:
         taxa_new="'$taxa'";
         datasets summary genome taxon "$taxa_new" --assembly-source {params.source} \
             --as-json-lines | \
-        dataformat tsv genome > {output};
+        dataformat tsv genome --fields accession,annotinfo-name,organism-tax-id > {output};
         """
 
 rule merge_genome_summary:

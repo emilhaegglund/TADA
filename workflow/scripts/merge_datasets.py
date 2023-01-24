@@ -1,18 +1,26 @@
+"""
+Script to merge the genome accession datasets tables downloaded for each taxonomy.
+"""
 import pandas as pd
-import numpy as np
-import sys
 
+
+# Open and merge the tables
 dfs = []
 for df_path in snakemake.input:
-    print(df_path)
     df = pd.read_csv(df_path, sep="\t")
     dfs.append(df)
-
 df = pd.concat(dfs)
+
+# Remove the assembly if it is suppressed
 df = df[df["Assembly Status"] != "suppressed"]
+
+# Subset tables
 df = df[["Assembly Accession", "Organism Taxonomic ID", "Annotation Name"]]
+
+# Create a columns which tells if there is an annotation associated with the assembly
 df["annotation"] = pd.notnull(df['Annotation Name'])
-#df = df[df["miss_annotation"] == True]
+
+# Rename columns
 df.rename(
     columns={
         "Assembly Accession": "assembly_accession",
@@ -20,6 +28,8 @@ df.rename(
     },
     inplace=True,
 )
+
+# Drop assemblies that are present multiple times in the table
 df.drop_duplicates(subset="assembly_accession", inplace=True)
 df[["assembly_accession", "taxid", "annotation"]].to_csv(
     snakemake.output[0], sep="\t", index=False

@@ -52,4 +52,4 @@ rule merge_metadata_tables:
     output:
         "gtdb_data/metadata_r207.wo_suppressed_records.tsv"
     script:
-        "../scripts/merge_tables.py"
+        "../scripts/merge_gtdb_ar_bac_metadata.py"

@@ -66,7 +66,7 @@ rule download_gtdb_summary:
 
 rule filter_gtdb:
     """
-    merge the genome summary files into a single tsv table
+    Merge the genome summary files into a single tsv table
     """
     input:
         "{method}.ncbi_datasets.tsv"
