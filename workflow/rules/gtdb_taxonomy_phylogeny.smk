@@ -19,13 +19,6 @@ rule prune_gtdb_phylogeny:
         "../envs/ete.yaml"
     script:
         "../scripts/prune_gtdb_phylogeny.py"
-        #    --phylogeny {input.phylogeny} \
-        #    --gtdb-metadata {input.metadata} \
-        #    --taxa {params.taxa} \
-        #    --completeness {params.completeness} \
-        #    --contamination {params.contamination} \
-        #    --output-metadata {output.metadata} \
-        #    --output-tree {output.tree} \
 
 rule merge_prune_gtdb_output:
     input:
@@ -52,7 +45,7 @@ rule subsample_gtdb:
         contamination=config["sample_gtdb"]["contamination"],
         gtdb_representative=config["sample_gtdb"]["gtdb_species_representative"]
     script:
-        "../scripts/subsample_gtdb.py"
+        "../scripts/subsample_gtdb_taxonomy.py"
 
 rule download_gtdb_summary:
     input:

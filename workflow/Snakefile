@@ -3,10 +3,10 @@ import yaml
 import os
 
 include: "rules/download_gtdb_data.smk"
-include: "rules/download_refseq_data.smk"
-include: "rules/gtdb.smk"
-include: "rules/download_genome_data_new.smk"
-include: "rules/refseq.smk"
+include: "rules/download_ncbi_data.smk"
+include: "rules/gtdb_taxonomy_phylogeny.smk"
+include: "rules/ncbi_taxonomy.smk"
+include: "rules/download_sampled_data.smk"
 
 workdir: config['workdir']
 
