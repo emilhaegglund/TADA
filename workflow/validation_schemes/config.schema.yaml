@@ -12,11 +12,15 @@ properties:
     default: "sampled_proteomes"
   method:
     type: string
-    enum: ["sample_gtdb", "sample_refseq", "prune_gtdb"]
+    enum: ["sample_gtdb", "sample_ncbi", "prune_gtdb"]
     description: which version of the workflow to run
-  download:
+  download_proteomes:
     type: boolean
-    default: True
+    default: False
+    description: set to false if the workflow should stop after sampling
+  download_genomes:
+    type: boolean
+    default: False
     description: set to false if the workflow should stop after sampling
 
   sample_gtdb:
@@ -40,6 +44,10 @@ properties:
       sampling_scheme:
         type: string
         description: path to sampling scheme
+      source:
+        type: string
+        description:
+        enum: ["all", "RefSeq", "GenBank"]
 
   prune_gtdb:
     properties:

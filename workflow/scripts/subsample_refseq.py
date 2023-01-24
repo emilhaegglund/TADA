@@ -7,7 +7,7 @@ import sys
 def parse_command_line():
     args = argparse.ArgumentParser()
     args.add_argument("--refseq-metadata", required=True)
-    args.add_argument("--historical", required=True)
+#    args.add_argument("--historical", required=True)
     args.add_argument("--names", required=True)
     args.add_argument("--nodes", required=True)
     args.add_argument("--sampling-scheme", required=True)
@@ -59,53 +59,34 @@ def get_taxa_level_index(taxa, taxa_levels, df):
         if taxa in df[level].to_list():
             return taxa_level_index
 
-args = parse_command_line()
-header = [
-    "assembly_accession",
-    "bioproject",
-    "biosample",
-    "wgs_master",
-    "refseq_category",
-    "taxid",
-    "species_taxid",
-    "organism_name",
-    "infraspecific_name",
-    "isolate",
-    "version_status",
-    "assembly_level",
-    "release_type",
-    "genome_rep",
-    "seq_rel_date",
-    "asm_name",
-    "submitter",
-    "gbrs_paired_asm",
-    "paired_asm_comp",
-    "ftp_path",
-    "excluded_from_refseq",
-    "relation_to_type_material",
-    "asm_not_live_date",
-]
+#args = parse_command_line()
+ncbi_metadat_path = snakemake.input.metadata
+names_path = snakemake.input.names
+nodes_path = snakemake.input.nodes
+sampling_scheme_path = snakemake.params.sampling_scheme
+output_path = snakemake.output[0]
+
 assemblies_df = pd.read_csv(
-    args.refseq_metadata, sep="\t", comment="#", names=header, low_memory=False
+    ncbi_metadat_path, sep="\t", comment="#", low_memory=False
 )
 
 # Clear all entries that does not have an ftp-path
 #assemblies_df = assemblies_df.dropna(subset=["ftp_path"])
 
-assemblies_historical_df = pd.read_csv(
-    args.historical,
-    sep="\t",
-    comment="#",
-    names=header,
-)
+#assemblies_historical_df = pd.read_csv(
+#    args.historical,
+#    sep="\t",
+#    comment="#",
+#    names=header,
+#)
 
-historical_accessions = assemblies_historical_df["assembly_accession"].to_list()
-assemblies_df = assemblies_df[~assemblies_df["assembly_accession"].isin(historical_accessions)]
+#historical_accessions = assemblies_historical_df["assembly_accession"].to_list()
+#assemblies_df = assemblies_df[~assemblies_df["assembly_accession"].isin(historical_accessions)]
 
 
 taxa_levels = ["domain", "phylum", "class", "order", "family", "genus", "species"]
-taxonomy = read_taxonomy(args.nodes)
-names = read_names(args.names)
+taxonomy = read_taxonomy(nodes_path)
+names = read_names(names_path)
 data = []
 
 for taxid in assemblies_df["taxid"]:
@@ -133,7 +114,7 @@ taxonomy_df.to_csv("test.taxonomy.tsv", sep="\t", index=False)
 taxonomy_df.drop_duplicates(inplace=True)
 df = pd.merge(left=assemblies_df, right=taxonomy_df, on="taxid")
 
-with open(args.sampling_scheme, "r") as stream:
+with open(sampling_scheme_path, "r") as stream:
     sampling_scheme = yaml.safe_load(stream)
 
 sampling_order = {}  # Store sampling parameters
@@ -162,7 +143,7 @@ for taxa in sampling_scheme:
         else:
             sys.exit("{taxa} is of rank {taxa_rank}, not possible to sample at the higher rank {sampling_rank}".format(taxa=taxa, taxa_rank=taxa_levels[taxa_level_index], sampling_rank=sampling_level))
     else:
-        sys.exit("{taxa} is not a valid taxonomic name in RefSeq".format(taxa=taxa))
+        sys.exit("{taxa} is not a valid taxonomic name in NCBI".format(taxa=taxa))
 
 # Reorder the sampling dictionary so tha we start sampling from species level and the continue
 # with higher levels
@@ -221,4 +202,4 @@ for taxa_level_index in sampling_order.keys():
         used_data.append(sampling_df)
 
 sampled_df = pd.concat(sampled_dfs)
-sampled_df.to_csv(args.output, sep='\t', index=False)
+sampled_df.to_csv(output_path, sep='\t', index=False)

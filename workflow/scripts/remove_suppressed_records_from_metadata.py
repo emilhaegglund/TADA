@@ -1,26 +1,19 @@
 import pandas as pd
-import argparse
 
 
-def parse_command_line():
-    args = argparse.ArgumentParser()
-    args.add_argument("--metadata", required=True)
-    args.add_argument("--suppressed-genbank-records", required=True)
-    args.add_argument("--suppressed-refseq-records", required=True)
-    args.add_argument("--output", required=True)
+metadata = snakemake.input.metadata
+suppressed_genbank_records = snakemake.input.suppressed_genbank_records
+suppressed_refseq_records = snakemake.input.suppressed_refseq_records
+output = snakemake.output[0]
 
-    return args.parse_args()
-
-
-args = parse_command_line()
-metadata_df = pd.read_csv(args.metadata, sep="\t", low_memory=False)
+metadata_df = pd.read_csv(metadata, sep="\t", low_memory=False)
 
 suppressed_names = [
     "assembly_accession",
 ]
 
 suppressed_refseq_df = pd.read_csv(
-    args.suppressed_refseq_records,
+    suppressed_refseq_records,
     sep="\t",
     comment="#",
     names=suppressed_names,
@@ -28,7 +21,7 @@ suppressed_refseq_df = pd.read_csv(
 )
 
 suppressed_genbank_df = pd.read_csv(
-    args.suppressed_genbank_records,
+    suppressed_genbank_records,
     sep="\t",
     comment="#",
     names=suppressed_names,
@@ -53,4 +46,4 @@ suppressed_genbank_accessions = suppressed_genbank_df["assembly_accession"].to_l
 metadata_df = metadata_df[
     ~metadata_df["ncbi_genbank_assembly_accession"].isin(suppressed_genbank_accessions)
 ]
-metadata_df.to_csv(args.output, sep="\t", index=False)
+metadata_df.to_csv(output, sep="\t", index=False)

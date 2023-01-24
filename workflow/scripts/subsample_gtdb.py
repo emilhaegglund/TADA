@@ -1,20 +1,6 @@
 import pandas as pd
-import argparse
 import yaml
 import sys
-
-
-def read_command_line():
-    """Read command line arguments"""
-    args = argparse.ArgumentParser()
-    args.add_argument("--gtdb-metadata", required=True)
-    args.add_argument("--sampling-scheme", required=True)
-    args.add_argument("--output", required=True)
-    args.add_argument("--completeness", type=float, default=0)
-    args.add_argument("--contamination", type=float, default=100)
-    args.add_argument("--gtdb-representative", action="store_true")
-
-    return args.parse_args()
 
 
 def check_taxa_name(taxa, taxa_levels, df):
@@ -36,14 +22,20 @@ def get_taxa_level_index(taxa, taxa_levels, df):
             return taxa_level_index
 
 
-args = read_command_line()
+# Define variables from snakemake
+gtdb_metadata = snakemake.input.metadata
+sampling_scheme_path = snakemake.params.sampling_scheme
+completeness = float(snakemake.params.completeness)
+contamination = float(snakemake.params.contamination)
+gtdb_representative = snakemake.params.gtdb_representative
+output = snakemake.output[0]
 
 # Read sampling scheme
-with open(args.sampling_scheme, "r") as stream:
+with open(sampling_scheme_path, "r") as stream:
     sampling_scheme = yaml.safe_load(stream)
 
 # Read GTDB metadata
-df = pd.read_csv(args.gtdb_metadata, sep="\t", low_memory=False)
+df = pd.read_csv(gtdb_metadata, sep="\t", low_memory=False)
 df[
     ["domain", "phylum", "class", "order", "family", "genus", "species"]
 ] = df.gtdb_taxonomy.str.split(";", expand=True)
@@ -59,12 +51,12 @@ df["species"] = df["species"].str.replace("s__", "")
 
 # Filter based on contamination and completeness
 df = df[
-    (df.checkm_contamination <= args.contamination)
-    & (df.checkm_completeness >= args.completeness)
+    (df.checkm_contamination <= contamination)
+    & (df.checkm_completeness >= completeness)
 ]
 
 # Keep only GTDB-species representatives
-if args.gtdb_representative:
+if gtdb_representative:
     df = df[df.gtdb_representative == "t"]
 
 # Remove accession prefix
@@ -164,4 +156,4 @@ for taxa_level_index in sampling_order.keys():
 
 sampled_df = pd.concat(sampled_dfs)
 sampled_df.drop_duplicates(inplace=True)
-sampled_df.to_csv(args.output, sep="\t", index=False)
+sampled_df.to_csv(output, sep="\t", index=False)
