@@ -1,3 +1,20 @@
+
+if "prune_gtdb" not in config.keys():
+    config["prune_gtdb"] = {"bac120": 0,
+                            "ar53": 0,
+                            "completeness": 0,
+                            "contamination": 100
+                            }
+
+if "sample_gtdb" not in config.keys():
+    config["sample_gtdb"] = {"sampling_scheme": "",
+                            "completeness": 0,
+                            "contamination": 100,
+                            "gtdb_species_representative": False
+                            }
+
+validate(config, schema="../validation_schemes/config.schema.yaml")
+
 if config["sample_gtdb"]["gtdb_species_representative"]:
     config["sample_gtdb"]["gtdb_species_representative_opt"] = "--gtdb-representative"
 else:
@@ -6,15 +23,15 @@ else:
 rule prune_gtdb_phylogeny:
     input:
         phylogeny="gtdb_data/{domain}_r207.tree",
-        metadata="gtdb_data/{domain}_metadata_r207.wo_suppressed_records.tsv"
+        metadata="gtdb_data/metadata_r207.wo_suppressed_records.tsv"
     output:
         phylogeny="prune_gtdb.{domain}.nwk",
         metadata="prune_gtdb.{domain}.metadata.tsv",
-
     params:
         taxa=lambda wildcards: config["prune_gtdb"]["{}".format(wildcards.domain)],
         completeness=config["prune_gtdb"]["completeness"],
         contamination=config["prune_gtdb"]["contamination"],
+        seed=config["seed"]
     conda:
         "../envs/ete.yaml"
     script:
@@ -25,11 +42,9 @@ rule merge_prune_gtdb_output:
         bacteria_metadata="prune_gtdb.bac120.metadata.tsv",
         archaea_metadata="prune_gtdb.ar53.metadata.tsv"
     output:
-        "prune_gtdb.metadata.tsv"
+        metadata="prune_gtdb.metadata.tsv"
     script:
-        """
-        ../scripts/merge_tables.py {input.bacteria_metadata} {input.archaea_metadata} {output}
-        """
+        "../scripts/merge_pruned_tables.py"
 
 rule subsample_gtdb:
     """

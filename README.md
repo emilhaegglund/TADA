@@ -39,18 +39,26 @@ Sampling from GTDB is limited to taxa from Bacteria and Archaea. Sampling GTDB c
 method: "sample_gtdb"
 ```
 
+A random seed can be used for the sampling and pruning to give the same output. Notice that the input might change between runtimes for the sampling based on the NCBI Taxonomy so that using the same seed will not yield the same results. For sampling and pruning based on GTDB output should be stable over time. 
+
+```
+seed: 1
+```
+
 ### Select output
 There are several output options for SDBW. First we can select if the workflow should download genomes and proteomes for the sampled taxa. If both options below are set to False, the workflow will stop after the sampling procedure. If a annotation does not exist for a sampled taxa, the genome will be annotated using Prokka.
 ```
 download_genomes: False
+download_cds: False
 download_proteomes: True
 ```
 We can also make the workflow build different type of Blast-databases, either using the NCBI Blast suite or Diamond.
 ```
 output:
-    blast_nucleotide_genome: False
+    blast_genomes: False
+    blast_cds: False
     blast_protein: False
-    diamond: True
+    diamond_protein: True
 ```
 ### Options for sampling
 Next follows option that are specific to the different sampling methods listed above.

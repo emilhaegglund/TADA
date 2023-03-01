@@ -1,19 +1,6 @@
 import pandas as pd
-import argparse
 import yaml
 import sys
-
-
-def parse_command_line():
-    args = argparse.ArgumentParser()
-    args.add_argument("--refseq-metadata", required=True)
-#    args.add_argument("--historical", required=True)
-    args.add_argument("--names", required=True)
-    args.add_argument("--nodes", required=True)
-    args.add_argument("--sampling-scheme", required=True)
-    args.add_argument("--output", required=True)
-
-    return args.parse_args()
 
 
 def read_names(names_path):
@@ -59,11 +46,11 @@ def get_taxa_level_index(taxa, taxa_levels, df):
         if taxa in df[level].to_list():
             return taxa_level_index
 
-#args = parse_command_line()
 ncbi_metadat_path = snakemake.input.metadata
 names_path = snakemake.input.names
 nodes_path = snakemake.input.nodes
 sampling_scheme_path = snakemake.params.sampling_scheme
+seed = snakemake.params.seed
 output_path = snakemake.output[0]
 
 assemblies_df = pd.read_csv(
@@ -191,10 +178,10 @@ for taxa_level_index in sampling_order.keys():
                 sampled_dfs.append(taxa_level_df)
             elif taxa_level_df.shape[0] > n_taxa: # Sample
                 if "sampling_prob" in taxa_level_df.columns:
-                    sampled_df =  taxa_level_df.sample(n=n_taxa, weights="sampling_prob")
+                    sampled_df =  taxa_level_df.sample(n=n_taxa, weights="sampling_prob", random_state=seed)
                     sampled_dfs.append(sampled_df)
                 else:
-                    sampled_df = taxa_level_df.sample(n_taxa)
+                    sampled_df = taxa_level_df.sample(n_taxa, random_state=seed)
                     sampled_dfs.append(sampled_df)
             else:  # Less number of taxa then we like to sample, get all.
                 sampled_dfs.append(taxa_level_df)

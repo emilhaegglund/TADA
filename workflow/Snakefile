@@ -20,27 +20,38 @@ def all_input(wildcards):
         with open(config["sample_ncbi"]["sampling_scheme"], "r") as stream:
             sampling_scheme = yaml.safe_load(stream)
         for taxa in sampling_scheme.keys():
-            wanted_input.append(os.path.join(base_dir, "ncbi_data", taxa.replace(" ", "_") + ".tsv"))
-
-    if config["download_proteomes"]:
-        wanted_input.append("proteomes")
-    #if config["download_genomes"]:
-#        wanted_input.append(os.path.join(base_dir, config["prefix"] + "." + config["method"] + ".genome_data"))
-    #if config["download_proteomes"] and not config["download_genomes"]:
-        #wanted_input.append(os.path.join(base_dir, config["prefix"] + "." + config["method"] + ".genomes_wo_annotation"))
-    if config["output"]["diamond"]:
-        wanted_input.append(os.path.join('diamond_db', "sdbw.dmnd"))
-    if config["output"]["blast_protein"]:
-        wanted_input.append(os.path.join('ncbi_blastp_db', "sdbw.pdb"))
-    #else:
-    #    wanted_input.append(os.path.join(base_dir, config["prefix"] + "." + config["method"] + ".sampled_accessions.txt"))
+            wanted_input.append(os.path.join("ncbi_data", taxa.replace(" ", "_") + ".tsv"))
+    if config["method"] == "sample_gtdb":
+        wanted_input.append("sample_gtdb.annotation_data.tsv")
     if config["method"] == "prune_gtdb":
         wanted_input.append(os.path.join("prune_gtdb.bac120.nwk"))
+        wanted_input.append(os.path.join("prune_gtdb.bac120.metadata.tsv"))
         wanted_input.append(os.path.join("prune_gtdb.ar53.nwk"))
-    print(wanted_input)
+        wanted_input.append(os.path.join("prune_gtdb.ar53.metadata.tsv"))
+
+    # Handle download options
+    if config["downloads"]["genomes"]:
+        wanted_input.append("genomes")
+    if config["downloads"]["cds"]:
+        wanted_input.append("cds")
+    if config["downloads"]["proteomes"]:
+        wanted_input.append("proteomes")
+
+    # Handle blast databases options
+    if config["databases"]["diamond_protein"] and config["downloads"]["proteomes"]:
+        if config["downloads"]["proteomes"]:
+            wanted_input.append(os.path.join('diamond_db', "sdbw.dmnd"))
+        else:
+            print("Building Diamond-database require turning the download proteome option to True")
+    if config["databases"]["blast_protein"]:
+        if config["downloads"]["proteomes"]:
+            wanted_input.append(os.path.join('ncbi_blastp_db', "sdbw.pdb"))
+        else:
+            print("Building Blast protein-database require turning the download proteome option to True")
     return wanted_input
 
 # Validate config-file
 validate(config, schema="validation_schemes/config.schema.yaml")
+
 rule all:
     input: all_input

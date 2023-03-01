@@ -1,3 +1,6 @@
+if "sample_ncbi" not in config.keys():
+    config["sample_ncbi"] = {"sampling_scheme": "", "source": "GenBank"}
+
 TAXA = []
 if config["method"] == "sample_ncbi":
     with open(config["sample_ncbi"]["sampling_scheme"], "r") as stream:
@@ -21,7 +24,7 @@ rule download_summary:
         taxa_new="'$taxa'";
         datasets summary genome taxon "$taxa_new" --assembly-source {params.source} \
             --as-json-lines | \
-        dataformat tsv genome --fields accession,annotinfo-name,organism-tax-id > {output};
+        dataformat tsv genome --fields accession,annotinfo-name,assminfo-status,organism-tax-id > {output};
         """
 
 rule merge_genome_summary:

@@ -1,7 +1,8 @@
 from ete3 import Tree
 import pandas as pd
-import time
 import bisect
+import random
+import sys
 
 
 def calculate_distance(node):
@@ -15,8 +16,11 @@ metadata_path = snakemake.input.metadata
 nr_taxa = snakemake.params.taxa
 completeness = float(snakemake.params.completeness)
 contamination = float(snakemake.params.contamination)
+random.seed(int(snakemake.params.seed))
 output_metadata = snakemake.output.metadata
 output_phylogeny = snakemake.output.phylogeny
+
+
 
 # Read phylogeny
 tree = Tree(phylogeny_path, format=1, quoted_node_names=True)
@@ -46,11 +50,20 @@ df = df[
 clean_accessions = list(set(df['accession'].to_list()))
 print(len(clean_accessions))
 
-start_time = time.time()
+# If we ask for 0 taxa, we still require the output-files for downstream
+# steps of the workflow.
+if nr_taxa == 0:
+    print("Write empty metadata-file")
+    df = df[0:0]
+    df.to_csv(output_metadata, sep="\t", index=False)
+    print("Write empty newick-file")
+    with open(output_phylogeny, "w") as f:
+        pass
+    sys.exit()
+
 print(len(set(tree.get_leaf_names())))
 tree.prune(clean_accessions, preserve_branch_length=True)
 print(len(tree.get_leaf_names()))
-print(time.time() - start_time)
 
 # Compute distance between each sister leaf-pair
 print('Calculate pair-wise distances')
@@ -74,8 +87,13 @@ while len(tree.get_leaves()) > nr_taxa:
 
     # Randomly trim one of the leaf
     min_node_children = min_node.get_children()
-    prune = min_node_children[1]
-    keep = min_node_children[0]
+    prune_idx = random.randint(0,1)
+    if prune_idx == 0:
+        keep_idx = 1
+    else:
+        keep_idx = 0
+    prune = min_node_children[prune_idx]
+    keep = min_node_children[keep_idx]
     parent_dist = keep.dist
     new_parent_dist = parent_dist + keep.up.dist
     parent = keep.up

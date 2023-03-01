@@ -6,48 +6,80 @@ properties:
     type: string
     description: name of output directory
     default: "results"
-  prefix:
-    type: string
-    description: name of directory with sampled proteomes and prefix name of databases
-    default: "sampled_proteomes"
   method:
     type: string
     enum: ["sample_gtdb", "sample_ncbi", "prune_gtdb"]
-    description: which version of the workflow to run
-  download_proteomes:
-    type: boolean
-    default: False
-    description: set to false if the workflow should stop after sampling
-  download_genomes:
-    type: boolean
-    default: False
-    description: set to false if the workflow should stop after sampling
+    description: sampling strategy to use
+  seed:
+    type: integer
+    description: value for random seed to use in pruning and sampling step
+    default: 1
+  
+  download:
+    description: select what type of sequence files to downloads, if all false, workflow will stop after sampling
+    properties:
+      genomes:
+        type: boolean
+        default: False
+        description: set to True to download genomic sequences of sampled genomes
+      genes:
+        type: boolean
+        default: False
+        description: set to True to download nucleotide sequence for genes from sampled genomes
+      proteomes:
+        type: boolean
+        default: False
+        description: set to True to download proteins from sampled genomes
+
+  blast_databases:
+    properties:
+      blast_genome:
+        type: boolean
+        default: False
+        description: build nucleotide database from genomic sequences
+      blast_cds:
+        type: boolean
+        default: False
+        description: build nucleotide database from gene sequences
+      blast_protein:
+        type: boolean
+        default: False
+        description: build protein database from proteins
+      diamond_protein:
+        type: boolean
+        default: False
+        description: build protein database from proteins using diamond
 
   sample_gtdb:
     properties:
       sampling_scheme:
         type: string
         description: path to sampling scheme
+        default: ""
       completeness:
         type: number
         description: remove entries with a completeness estimated lower than given value
+        default: 0
       contamination:
         type: number
         description: remove entries with a contamination higher than given value
+        default: 100
       gtdb_species_representatives:
         type: boolean
         description: keep only entries that are classified as species representetives
+        default: False
 
-
-  sample_refseq:
+  sample_ncbi:
     properties:
       sampling_scheme:
         type: string
         description: path to sampling scheme
+        default: ""
       source:
         type: string
-        description:
-        enum: ["all", "RefSeq", "GenBank"]
+        description: select database to sample from
+        enum: ["RefSeq", "GenBank"]
+        default: "GenBank"
 
   prune_gtdb:
     properties:

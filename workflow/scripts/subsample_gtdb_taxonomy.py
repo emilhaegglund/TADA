@@ -28,6 +28,7 @@ sampling_scheme_path = snakemake.params.sampling_scheme
 completeness = float(snakemake.params.completeness)
 contamination = float(snakemake.params.contamination)
 gtdb_representative = snakemake.params.gtdb_representative
+seed = int(snakemake.params.seed)
 output = snakemake.output[0]
 
 # Read sampling scheme
@@ -144,10 +145,10 @@ for taxa_level_index in sampling_order.keys():
                 sampled_dfs.append(taxa_level_df)
             elif taxa_level_df.shape[0] > n_taxa:
                 if "sampling_prob" in taxa_level_df.columns:
-                    sampled_df =  taxa_level_df.sample(n=n_taxa, weights="sampling_prob")
+                    sampled_df =  taxa_level_df.sample(n=n_taxa, weights="sampling_prob", random_state=seed)
                     sampled_dfs.append(sampled_df)
                 else:
-                    sampled_df = taxa_level_df.sample(n_taxa)
+                    sampled_df = taxa_level_df.sample(n_taxa, random_state=seed)
                     sampled_dfs.append(sampled_df)
             else:
                 sampled_dfs.append(taxa_level_df)
