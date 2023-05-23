@@ -22,8 +22,8 @@ else:
 
 rule prune_gtdb_phylogeny:
     input:
-        phylogeny="gtdb_data/{domain}_r207.tree",
-        metadata="gtdb_data/metadata_r207.wo_suppressed_records.tsv"
+        phylogeny="gtdb_data/{domain}_r214.tree",
+        metadata="gtdb_data/metadata_r214.wo_suppressed_records.tsv"
     output:
         phylogeny="prune_gtdb.{domain}.nwk",
         metadata="prune_gtdb.{domain}.metadata.tsv",
@@ -51,7 +51,7 @@ rule subsample_gtdb:
     Use the metadata and taxonomy information to subsample the gtdb-data.
     """
     input:
-        metadata="gtdb_data/metadata_r207.wo_suppressed_records.tsv"
+        metadata="gtdb_data/metadata_r214.wo_suppressed_records.tsv"
     output:
         "sample_gtdb.metadata.tsv"
     params:
