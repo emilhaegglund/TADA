@@ -22,8 +22,8 @@ else:
 
 rule prune_gtdb_phylogeny:
     input:
-        phylogeny="gtdb_data/{domain}_r214.tree",
-        metadata="gtdb_data/metadata_r214.wo_suppressed_records.tsv"
+        phylogeny="gtdb_data/{domain}_r{version}.tree",
+        metadata="gtdb_data/metadata_r{version}.wo_suppressed_records.tsv"
     output:
         phylogeny="prune_gtdb.{domain}.nwk",
         metadata="prune_gtdb.{domain}.metadata.tsv",
@@ -46,12 +46,16 @@ rule merge_prune_gtdb_output:
     script:
         "../scripts/merge_pruned_tables.py"
 
+def subsample_input(wildcards):
+    return "gtdb_data/metadata_r" + str(config["sample_gtdb"]["version"]) + ".wo_suppressed_records.tsv"
+
 rule subsample_gtdb:
     """
     Use the metadata and taxonomy information to subsample the gtdb-data.
     """
     input:
-        metadata="gtdb_data/metadata_r214.wo_suppressed_records.tsv"
+        metadata=subsample_input
+        #metadata="gtdb_data/metadata_r{version}.wo_suppressed_records.tsv"
     output:
         "sample_gtdb.metadata.tsv"
     params:

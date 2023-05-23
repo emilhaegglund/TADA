@@ -69,9 +69,9 @@ properties:
         description: keep only entries that are classified as species representetives
         default: False
       version:
-        type: string
-        enum: ["207", "214"]
-        default: "214"
+        type: number
+        enum: [207, 214]
+        default: 214
 
   sample_ncbi:
     properties:
