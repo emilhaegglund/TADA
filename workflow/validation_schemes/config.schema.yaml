@@ -13,8 +13,8 @@ properties:
   seed:
     type: integer
     description: value for random seed to use in pruning and sampling step
-    default: 1
-  
+    default: 42
+
   download:
     description: select what type of sequence files to downloads, if all false, workflow will stop after sampling
     properties:
@@ -68,6 +68,10 @@ properties:
         type: boolean
         description: keep only entries that are classified as species representetives
         default: False
+      version:
+        type: string
+        enum: ["207", "214"]
+        default: "214"
 
   sample_ncbi:
     properties:
@@ -95,3 +99,7 @@ properties:
       contamination:
         type: number
         description: remove entries with a contamination higher than given value
+      version:
+        type: string
+        enum: ["207", "214"]
+        default: "214"

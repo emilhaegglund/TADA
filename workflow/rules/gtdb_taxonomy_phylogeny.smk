@@ -58,7 +58,8 @@ rule subsample_gtdb:
         sampling_scheme=config["sample_gtdb"]["sampling_scheme"],
         completeness=config["sample_gtdb"]["completeness"],
         contamination=config["sample_gtdb"]["contamination"],
-        gtdb_representative=config["sample_gtdb"]["gtdb_species_representative"]
+        gtdb_representative=config["sample_gtdb"]["gtdb_species_representative"],
+        seed=config["seed"]
     script:
         "../scripts/subsample_gtdb_taxonomy.py"
 

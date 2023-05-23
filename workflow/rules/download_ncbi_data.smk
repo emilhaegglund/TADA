@@ -9,9 +9,6 @@ if config["method"] == "sample_ncbi":
         TAXA.append(taxa.replace(" ", "_"))
 
 rule download_summary:
-    """
-    Use t
-    """
     output:
         "ncbi_data/{taxa}.tsv"
     params:
