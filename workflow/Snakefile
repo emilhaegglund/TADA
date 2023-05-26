@@ -2,20 +2,12 @@ from snakemake.utils import validate
 import yaml
 import os
 
-include: "rules/download_gtdb_data.smk"
-include: "rules/download_ncbi_data.smk"
-include: "rules/gtdb_taxonomy_phylogeny.smk"
-include: "rules/ncbi_taxonomy.smk"
-include: "rules/download_sampled_data.smk"
-
-workdir: config['workdir']
-
 def all_input(wildcards):
     """
     Generate all inputs for the rule all
     """
     wanted_input = []
-    base_dir = config["base_dir"]
+    base_dir = config["workdir"]
     if config["method"] == "sample_ncbi":
         with open(config["sample_ncbi"]["sampling_scheme"], "r") as stream:
             sampling_scheme = yaml.safe_load(stream)
@@ -54,6 +46,13 @@ def all_input(wildcards):
 
 # Validate config-file
 validate(config, schema="validation_schemes/config.schema.yaml")
+
+workdir: config['workdir']
+include: "rules/download_gtdb_data.smk"
+include: "rules/download_ncbi_data.smk"
+include: "rules/gtdb_taxonomy_phylogeny.smk"
+include: "rules/ncbi_taxonomy.smk"
+include: "rules/download_sampled_data.smk"
 
 rule all:
     input: all_input

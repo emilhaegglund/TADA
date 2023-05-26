@@ -1,11 +1,11 @@
-$schema: "https://json-schema.org/draft-06/schema#"
+$schema: "https://json-schema.org/draft/2020-12/schema"
 description: Validation schema for config-file
 
+type: object
 properties:
-  base_dir:
+  workdir:
     type: string
     description: name of output directory
-    default: "results"
   method:
     type: string
     enum: ["sample_gtdb", "sample_ncbi", "prune_gtdb"]
@@ -55,7 +55,6 @@ properties:
       sampling_scheme:
         type: string
         description: path to sampling scheme
-        default: ""
       completeness:
         type: number
         description: remove entries with a completeness estimated lower than given value
@@ -72,18 +71,19 @@ properties:
         type: number
         enum: [207, 214]
         default: 214
+    required: [sampling_scheme]
 
   sample_ncbi:
     properties:
       sampling_scheme:
         type: string
         description: path to sampling scheme
-        default: ""
       source:
         type: string
         description: select database to sample from
         enum: ["RefSeq", "GenBank"]
         default: "GenBank"
+    required: [sampling_scheme]
 
   prune_gtdb:
     properties:
@@ -103,3 +103,5 @@ properties:
         type: string
         enum: ["207", "214"]
         default: "214"
+
+required: [workdir, method]
