@@ -31,10 +31,18 @@ rule merge_genome_summary:
     input:
         expand("ncbi_data/{taxa}.tsv", taxa=TAXA)
     output:
-        "ncbi_data/datasets.tsv"
+        "ncbi_data/datasets_unchecked.tsv"
     script:
         "../scripts/merge_datasets.py"
 
+rule check_for_euk:
+    input:
+        dataset = "ncbi_data/datasets_unchecked.tsv",
+        nodes = "ncbi_data/taxdmp/nodes.dmp"
+    output:
+        dataset = "ncbi_data/datasets.tsv"
+    script:
+        "../scripts/check_for_non_supported_taxa.py"
 
 rule download_suppressed_genbank_records:
     output:
