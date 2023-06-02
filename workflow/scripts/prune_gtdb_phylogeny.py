@@ -16,10 +16,10 @@ metadata_path = snakemake.input.metadata
 nr_taxa = snakemake.params.taxa
 completeness = float(snakemake.params.completeness)
 contamination = float(snakemake.params.contamination)
+prune_method = snakemake.params.prune_method
 random.seed(int(snakemake.params.seed))
 output_metadata = snakemake.output.metadata
 output_phylogeny = snakemake.output.phylogeny
-
 
 
 # Read phylogeny
@@ -87,11 +87,30 @@ while len(tree.get_leaves()) > nr_taxa:
 
     # Randomly trim one of the leaf
     min_node_children = min_node.get_children()
-    prune_idx = random.randint(0,1)
-    if prune_idx == 0:
-        keep_idx = 1
-    else:
-        keep_idx = 0
+    if prune_method == "random":
+        prune_idx = random.randint(0,1)
+        if prune_idx == 0:
+            keep_idx = 1
+        else:
+            keep_idx = 0
+    elif prune_method == "shortest":
+        if min_node_children[0].dist <= min_node_children[1].dist:
+            keep_idx = 0
+            prune_idx = 1
+            print("keep: ", min_node_children[0].dist)
+            print("prune: ", min_node_children[1].dist)
+        else:
+            keep_idx = 1
+            prune_idx = 0
+    elif prune_method == "longest":
+        if min_node_children[0].dist >= min_node_children[1].dist:
+            keep_idx = 0
+            prune_idx = 1
+            print("keep: ", min_node_children[0].dist)
+            print("prune: ", min_node_children[1].dist)
+        else:
+            keep_idx = 1
+            prune_idx = 0
     prune = min_node_children[prune_idx]
     keep = min_node_children[keep_idx]
     parent_dist = keep.dist
@@ -116,8 +135,6 @@ while len(tree.get_leaves()) > nr_taxa:
     if len(child_nodes) > 1 and all([child.is_leaf() for child in child_nodes]):
         distance = sum([new_parent.get_distance(child) for child in child_nodes])
         bisect.insort_left(sorted_distance_list, (distance, new_parent), key=lambda i: i[0])
-        #sorted_distance_list.append((distance, new_parent))
-        #sorted_distance_list = sorted(sorted_distance_list, key=lambda t: t[0])
 
 leafs = tree.get_leaf_names()
 

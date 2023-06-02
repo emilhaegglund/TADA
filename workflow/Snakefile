@@ -18,10 +18,11 @@ def all_input(wildcards):
     if config["method"] == "sample_gtdb":
         wanted_input.append("sample_gtdb.annotation_data.tsv")
     if config["method"] == "prune_gtdb":
-        wanted_input.append(os.path.join("prune_gtdb.bac120.nwk"))
-        wanted_input.append(os.path.join("prune_gtdb.bac120.metadata.tsv"))
-        wanted_input.append(os.path.join("prune_gtdb.ar53.nwk"))
-        wanted_input.append(os.path.join("prune_gtdb.ar53.metadata.tsv"))
+        gtdb_version = str(config["prune_gtdb"]["version"])
+        wanted_input.append(os.path.join("prune_gtdb.bac120_r" + gtdb_version + ".nwk"))
+        wanted_input.append(os.path.join("prune_gtdb.bac120_r" + gtdb_version + ".metadata.tsv"))
+        wanted_input.append(os.path.join("prune_gtdb.ar53_r" + gtdb_version + ".nwk"))
+        wanted_input.append(os.path.join("prune_gtdb.ar53_r" + gtdb_version + ".metadata.tsv"))
 
     # Handle download options
     if config["downloads"]["genomes"]:

@@ -198,7 +198,6 @@ rule collect_proteomes:
         directory("proteomes/")
     script:
         "../scripts/link_files.py"
-#ln -s $prot {output}
 
 rule collect_cds:
     input:
