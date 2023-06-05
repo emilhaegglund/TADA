@@ -84,7 +84,7 @@ sample_gtdb:
 
 `gtdb_species_representative`: False will keep all entries while True will only keep entries that are classified as GTDB species representatives.
 
-`version:` Select which version of GTDB to use, `r207` and `r214` are supported (Default: 214).
+`version:` Select which version of GTDB to use, `207` and `214` are supported (Default: `214`).
 
 __Example__
 
@@ -145,7 +145,7 @@ sample_ncbi:
 ```
 `sampling_scheme`: Path to the sampling scheme that will be used. See Defining a sampling scheme for more details on this.
 
-`source`: Sample from GenBank or RefSeq.
+`source`: Sample from `"GenBank"` or `"RefSeq"`.
 
 __Example__
 
