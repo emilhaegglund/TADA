@@ -102,7 +102,7 @@ properties:
       prune_method:
         type: string
         enum: ["random", "shortest", "longest"]
-        default: ["shortest"]
+        default: "shortest"
       version:
         type: string
         enum: ["207", "214"]

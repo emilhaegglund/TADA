@@ -5,7 +5,8 @@ if "prune_gtdb" not in config.keys():
     config["prune_gtdb"] = {"bac120": 0,
                             "ar53": 0,
                             "completeness": 0,
-                            "contamination": 100
+                            "contamination": 100,
+                            "prune_method": "shortest"
                             }
 
 if "sample_gtdb" not in config.keys():
@@ -38,14 +39,17 @@ rule prune_gtdb_phylogeny:
     script:
         "../scripts/prune_gtdb_phylogeny.py"
 
-def prune_input(wildcards):
-    bac = "prune_gtdb.bac120_r" + str(config["prune_gtdb"]["version"]) + ".metadata.tsv"
-    ar = "prune_gtdb.ar53_r" + str(config["prune_gtdb"]["version"]) + ".metadata.tsv"
-    return [bac, ar]
+def bac120_prune_input(wildcards):
+    return "prune_gtdb.bac120_r" + str(config["prune_gtdb"]["version"]) + ".metadata.tsv"
+
+def ar53_prune_input(wildcards):
+    return "prune_gtdb.ar53_r" + str(config["prune_gtdb"]["version"]) + ".metadata.tsv"
+
 
 rule merge_prune_gtdb_output:
     input:
-        prune_input
+        bacteria_metadata = bac120_prune_input,
+        archaea_metadata = ar53_prune_input
     output:
         metadata="prune_gtdb.metadata.tsv"
     script:

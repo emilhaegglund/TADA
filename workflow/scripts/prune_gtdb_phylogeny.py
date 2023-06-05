@@ -40,7 +40,6 @@ df["genus"] = df["genus"].str.replace("g__", "")
 df["species"] = df["species"].str.replace("s__", "")
 
 df = df[df['accession'].isin(tree.get_leaf_names())]
-print(df.shape)
 
 df = df[
     (df.checkm_contamination <= contamination)
@@ -48,22 +47,21 @@ df = df[
 ]
 
 clean_accessions = list(set(df['accession'].to_list()))
-print(len(clean_accessions))
 
 # If we ask for 0 taxa, we still require the output-files for downstream
 # steps of the workflow.
 if nr_taxa == 0:
-    print("Write empty metadata-file")
     df = df[0:0]
     df.to_csv(output_metadata, sep="\t", index=False)
-    print("Write empty newick-file")
     with open(output_phylogeny, "w") as f:
         pass
     sys.exit()
 
-print(len(set(tree.get_leaf_names())))
+orig_tree_size = len(set(tree.get_leaf_names()))
+print(f"Tree size: {orig_tree_size}")
 tree.prune(clean_accessions, preserve_branch_length=True)
-print(len(tree.get_leaf_names()))
+filt_tree_size = len(set(tree.get_leaf_names()))
+print(f"Tree size after filtering out taxa: {filt_tree_size}")
 
 # Compute distance between each sister leaf-pair
 print('Calculate pair-wise distances')
@@ -82,7 +80,7 @@ sorted_distance_list = sorted(distance_list, key=lambda t: t[0])
 print('Start to remove leaves')
 while len(tree.get_leaves()) > nr_taxa:
     if len(tree.get_leaves()) % 1000 == 0:
-        print(len(tree.get_leaves()))
+        print(f"Tree size  {len(tree.get_leaves())}")
     min_distance, min_node = sorted_distance_list[0]
 
     # Randomly trim one of the leaf
@@ -97,8 +95,6 @@ while len(tree.get_leaves()) > nr_taxa:
         if min_node_children[0].dist <= min_node_children[1].dist:
             keep_idx = 0
             prune_idx = 1
-            print("keep: ", min_node_children[0].dist)
-            print("prune: ", min_node_children[1].dist)
         else:
             keep_idx = 1
             prune_idx = 0
@@ -106,8 +102,6 @@ while len(tree.get_leaves()) > nr_taxa:
         if min_node_children[0].dist >= min_node_children[1].dist:
             keep_idx = 0
             prune_idx = 1
-            print("keep: ", min_node_children[0].dist)
-            print("prune: ", min_node_children[1].dist)
         else:
             keep_idx = 1
             prune_idx = 0
@@ -138,7 +132,7 @@ while len(tree.get_leaves()) > nr_taxa:
 
 leafs = tree.get_leaf_names()
 
-
+print("Write output files")
 df = df[df["accession"].isin(leafs)]
 df["accession"] = df["accession"].str.replace("GB_", "")
 df["accession"] = df["accession"].str.replace("RS_", "")
