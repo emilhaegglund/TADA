@@ -1,0 +1,56 @@
+# Config file to sample sequence databases
+workdir: "sample_gtdb"
+
+# Set which sampling method to use
+# Possible options are "sample_ncbi", "sample_gtdb", or "prune_gtdb"
+method: "sample_gtdb"
+
+# Random seed to use for sampling processes
+seed: 42
+
+# Set what files to download for each genome.
+# If all set to false, the workflow will stop after sampling.
+downloads:
+  genomes: False
+  cds: False
+  proteomes: False
+
+# Set what type of sequence database to generate.
+databases:
+  blast_genome: True
+  blast_cds: True
+  blast_protein: True
+  diamond_protein: True
+
+# Options for sampling based on NCBI-taxonomy
+sample_gtdb:
+  # Path to sampling scheme
+  sampling_scheme: "/data/emil/SDBW/config/sampling_scheme.basic.yaml"
+  # What DB in NCBI to use, can be "RefSeq" or "GenBank"
+  database: "RefSeq"
+
+# Options for sampling based on GTDB-taxonomy
+sample_gtdb:
+  # Path to sampling scheme
+  sampling_scheme: "/data/emil/SDBW/config/sampling_scheme.basic.yaml"
+  # Discard genomes with completeness less than this value
+  completeness: 50
+  # Discard genomes with contamination larger than this value
+  contamination: 10
+  # Keep only representative species in the sampling
+  gtdb_species_representative: True
+  # Select version of GTDB database
+  version: 214
+
+# Options for sampling based on GTDB-phylogeny
+prune_gtdb:
+  # Number of bacteria remaining after pruning
+  bac120: 300
+  # Number of archaea remaining after pruning
+  ar53: 50
+  # Discard genomes with completeness less than this value
+  completeness: 90
+  # Discard genomes with contamination larger than this value
+  contamination: 5
+  # Method to use for pruning, can be "shortest", "longest", or "random"
+  prune_method: "shortest"
