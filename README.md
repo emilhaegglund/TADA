@@ -1,13 +1,13 @@
-# SDBW
+# TADA - Taxonomic Aware Dataset Assembly
 A Snakemake workflow to assemble dataset for comperative and phylogenetic analysis of bacteria and archaea. Datasets can be generated baed on taxonomic information from [NCBI](https://www.ncbi.nlm.nih.gov/taxonomy), or taxonomic or phylogenomic information from [GTDB](https://gtdb.ecogenomic.org).
 
 ## Installing
-Running the SDBW-workflow requires Conda. First clone the repository from git
-and change into the SDBW directory.
+Running the TADA-workflow requires Conda. First clone the repository from git
+and change into the TADA directory.
 
 ```
-git clone https://github.com/emilhaegglund/SDBW.git
-cd SDBW
+git clone https://github.com/emilhaegglund/TADA.git
+cd TADA
 ```
 
 Next, install and activate the conda environment from which the
@@ -15,7 +15,7 @@ workflow will be run. This will install Mamba and Snakemake.
 
 ```
 conda env create -f environment.yaml
-conda activate sdbw
+conda activate tada
 ```
 
 ## Setting up the configuration file
@@ -45,7 +45,7 @@ seed:42
 ```
 
 ### Select output
-There are several output options for SDBW. First we can select if the workflow should download genomes, cds, or proteomes for the sampled genomes. If all options below are set to False, the workflow will stop after the sampling procedure. If an annotation does not exist for a sampled taxa, the genome will be annotated using Prokka.
+There are several output options for TADA. First we can select if the workflow should download genomes, cds, or proteomes for the sampled genomes. If all options below are set to False, the workflow will stop after the sampling procedure. If an annotation does not exist for a sampled taxa, the genome will be annotated using Prokka.
 
 ```
 download_genomes: False
@@ -100,7 +100,7 @@ subsample_gtdb:
 
 __Options for pruning the GTDB phylogenies__
 
-GTDB includes separate phylogenies for bacteria and archaea. SDBW will prune these phylogenies based on the evolutionary distance between taxa, reducing the number of taxa to the amount specified in the configuration file. Before the distance-based pruning, it is also possible to use the completeness and contamination criteria to remove taxa that do not meet these requirements from the phylogeny.
+GTDB includes separate phylogenies for bacteria and archaea. TADA will prune these phylogenies based on the evolutionary distance between taxa, reducing the number of taxa to the amount specified in the configuration file. Before the distance-based pruning, it is also possible to use the completeness and contamination criteria to remove taxa that do not meet these requirements from the phylogeny.
 
 ```
 prune_gtdb:
@@ -125,7 +125,7 @@ prune_gtdb:
 `version:` Select which version of GTDB to use, `207` and `214` are supported (Default: `214`).
 
 __Example__
-In the example belwo SDBW will first remove all taxa with an estimated completeness under 90% and an estimated contamination over 5%. It will then continue to prune the bacterial phylogeny untill 1000 taxa remains. For the archaeal phylogeny it will prune the phylogeny until 200 taxa remains.
+In the example belwo TADA will first remove all taxa with an estimated completeness under 90% and an estimated contamination over 5%. It will then continue to prune the bacterial phylogeny untill 1000 taxa remains. For the archaeal phylogeny it will prune the phylogeny until 200 taxa remains.
 
 ```
 prune_gtdb:
