@@ -125,6 +125,7 @@ prune_gtdb:
 `version:` Select which version of GTDB to use, `207` and `214` are supported (Default: `214`).
 
 __Example__
+
 In the example belwo TADA will first remove all taxa with an estimated completeness under 90% and an estimated contamination over 5%. It will then continue to prune the bacterial phylogeny untill 1000 taxa remains. For the archaeal phylogeny it will prune the phylogeny until 200 taxa remains.
 
 ```
@@ -137,6 +138,7 @@ prune_gtdb:
 ```
 
 __Options for sampling from the NCBI Taxonomy__
+
 To sample from the NCBI Taxonomy we have to give the path to a sampling scheme and we also need to define if we want to sample from GenBank or RefSeq. Sampling from NCBI is restricted to taxa classified as Bacteria or Archaea. The reason for this is that the annotation software in the workflow are for prokaryotic genomes.
 ```
 sample_ncbi:
