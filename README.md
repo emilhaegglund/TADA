@@ -1,5 +1,5 @@
 # TADA - Taxonomic Aware Dataset Assembly
-A Snakemake workflow to assemble dataset for comperative and phylogenetic analysis of bacteria and archaea. Datasets can be generated baed on taxonomic information from [NCBI](https://www.ncbi.nlm.nih.gov/taxonomy), or taxonomic or phylogenomic information from [GTDB](https://gtdb.ecogenomic.org).
+A Snakemake workflow to assemble dataset for comperative and phylogenetic analysis of bacteria and archaea. Datasets can be generated based on taxonomic information from [NCBI](https://www.ncbi.nlm.nih.gov/taxonomy), or taxonomic or phylogenomic information from [GTDB](https://gtdb.ecogenomic.org).
 
 ## Installing
 Running the TADA-workflow requires Conda. First clone the repository from git
@@ -10,13 +10,13 @@ git clone https://github.com/emilhaegglund/TADA.git
 cd TADA
 ```
 
-Next, install and activate the conda environment from which the
-workflow will be run. This will install Mamba and Snakemake.
-
+The next steps requires that you have [Conda](https://docs.conda.io/en/latest/) installed on the system. If not follow the link and install it.
+Next, run the following commands to install Mamba and Snakemake in an environment called `tada`, and then activate the ennvironment.
 ```
 conda env create -f environment.yaml
 conda activate tada
 ```
+You are now ready to use TADA. As a quick test to see that everything works you can try run some of the [examples](https://github.com/emilhaegglund/TADA/tree/main/examples).
 
 ## Setting up the configuration file
 Before running the workflow, the first step is to set up the configuration file. This file will determine the behavior of the workflow. An example of the configuration file can be found in `config/config.yaml`. You can either modify this file or create a new. The location of the config-file must be specified using the `--configfile` option when running Snakemake.
@@ -41,19 +41,21 @@ method: "sample_gtdb"
 A random seed can be used to reproduce the output of sampling and pruning from the GTDB-database.
 
 ```
-seed:42
+seed: 42
 ```
 
 ### Select output
-There are several output options for TADA. First we can select if the workflow should download genomes, cds, or proteomes for the sampled genomes. If all options below are set to False, the workflow will stop after the sampling procedure. If an annotation does not exist for a sampled taxa, the genome will be annotated using Prokka.
+There are several output options for TADA. First we can select if the workflow should download genomes, cds, or proteomes for the sampled genomes. If gene and protein sequences is not provided in NBCI for a sampled taxa, the genome will be downloaded and annotated using Prokka.
 
 ```
-download_genomes: False
-download_cds: False
-download_proteomes: True
+downloads:
+    genomes: False
+    cds: False
+    proteomes: True
 ```
+If all the download options are set to `False`, TADA will stop after the sampling procedure.
 
-We can also make the workflow build different type of Blast-databases, either using the [NCBI Blast](https://blast.ncbi.nlm.nih.gov/doc/blast-help/downloadblastdata.html#blast-executables) suite or [Diamond](https://github.com/bbuchfink/diamond).
+We can also make the workflow build different type of Blast-databases based on the downloaded data, either using the [NCBI Blast](https://blast.ncbi.nlm.nih.gov/doc/blast-help/downloadblastdata.html#blast-executables) suite or [Diamond](https://github.com/bbuchfink/diamond).
 
 ```
 output:
@@ -126,7 +128,7 @@ prune_gtdb:
 
 __Example__
 
-In the example belwo TADA will first remove all taxa with an estimated completeness under 90% and an estimated contamination over 5%. It will then continue to prune the bacterial phylogeny untill 1000 taxa remains. For the archaeal phylogeny it will prune the phylogeny until 200 taxa remains.
+In the example below, TADA will first remove all taxa with an estimated completeness under 90% and an estimated contamination over 5%. It will then continue to prune the bacterial phylogeny untill 1000 taxa remains. For the archaeal phylogeny it will prune the phylogeny until 200 taxa remains.
 
 ```
 prune_gtdb:
@@ -145,7 +147,7 @@ sample_ncbi:
     sampling_scheme: <path>
     source: <string>
 ```
-`sampling_scheme`: Path to the sampling scheme that will be used. See Defining a sampling scheme for more details on this.
+`sampling_scheme`: Path to the sampling scheme that will be used. See [Defining a sampling scheme](##defining-a-sampling-scheme) for more details on this.
 
 `source`: Sample from `"GenBank"` or `"RefSeq"`.
 

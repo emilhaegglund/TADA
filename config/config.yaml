@@ -23,7 +23,7 @@ databases:
   diamond_protein: True
 
 # Options for sampling based on NCBI-taxonomy
-sample_gtdb:
+sample_ncbi:
   # Path to sampling scheme
   sampling_scheme: "/data/emil/SDBW/config/sampling_scheme.basic.yaml"
   # What DB in NCBI to use, can be "RefSeq" or "GenBank"
