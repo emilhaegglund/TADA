@@ -79,7 +79,7 @@ sample_ncbi:
     sampling_scheme: <path>
     database: <string>
 ```
-`sampling_scheme`: Path to the sampling scheme that will be used. See [Defining a sampling scheme](##defining-a-sampling-scheme) for more details on this.
+`sampling_scheme`: Path to the sampling scheme that will be used. See [Defining a sampling scheme](#defining-a-sampling-scheme) for more details on this.
 
 `database`: Sample from `"GenBank"` or `"RefSeq"`.
 
@@ -103,7 +103,7 @@ sample_gtdb:
     version: <str>
 ```
 
-`sampling_scheme`: Path to the sampling scheme that will be used. See [Defining a sampling scheme](##defining-a-sampling-scheme) for more details on this.
+`sampling_scheme`: Path to the sampling scheme that will be used. See [Defining a sampling scheme](#defining-a-sampling-scheme) for more details on this.
 
 `completeness`: Exclude taxa with a completeness estimate less than this value (Default: `0`).
 
