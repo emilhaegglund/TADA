@@ -23,7 +23,7 @@ databases:
   diamond_protein: False
 
 # Options for sampling based on NCBI-taxonomy
-sample_gtdb:
+sample_ncbi:
   # Path to sampling scheme
   # Absolute path or relative to workdir
   sampling_scheme: "../../config/sampling_scheme.basic.yaml"
