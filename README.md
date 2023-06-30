@@ -1,16 +1,19 @@
 # TADA - Taxonomic Aware Dataset Assembly
-A Snakemake workflow to assemble dataset for comperative and phylogenetic analysis of bacteria and archaea. Datasets can be generated baed on taxonomic information from [NCBI](https://www.ncbi.nlm.nih.gov/taxonomy), or taxonomic or phylogenomic information from [GTDB](https://gtdb.ecogenomic.org).
+A Snakemake workflow to assemble balanced, representative and manageable datasets for comparative and phylogenetic analysis of bacteria and archaea. Datasets can be generated based either on the phylogenomic tree offered by [GTDB](https://gtdb.ecogenomic.org) , or on the taxonomy offered by GTDB or by [NCBI](https://www.ncbi.nlm.nih.gov/taxonomy).
+
+## Dependency
+Running the TADA-workflow requires [Conda](https://docs.conda.io/projects/conda/en/stable/). 
+
 
 ## Installing
-Running the TADA-workflow requires Conda. First clone the repository from git
-and change into the TADA directory.
+Clone the repository from git and change into the TADA directory.
 
 ```
 git clone https://github.com/emilhaegglund/TADA.git
 cd TADA
 ```
 
-Next, install and activate the conda environment from which the
+Install and activate the conda environment from which the
 workflow will be run. This will install Mamba and Snakemake.
 
 ```
