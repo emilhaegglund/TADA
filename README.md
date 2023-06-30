@@ -31,11 +31,11 @@ workdir: "results"
 
 ### Choice of sampling method
 The workflow can be run using three different methods:
-* Sampling based on the NCBI taxonomy.
-* Sampling based on the GTDB taxonomy.
-* Sampling based on the GTDB phylogeny.
+* Sampling based on the NCBI taxonomy (`sample_ncbi`).
+* Sampling based on the GTDB taxonomy (`sample_gtdb`).
+* Sampling based on the GTDB phylogeny (`prune_gtdb`).
 
-To determine which sampling method to use select one of the following option: `sample_ncbi`, `sample_gtdb`, or `prune_gtdb`.
+E.g.:
 
 ```
 method: "sample_gtdb"
@@ -79,13 +79,13 @@ sample_ncbi:
     sampling_scheme: <path>
     database: <string>
 ```
-`sampling_scheme`: Path to the sampling scheme that will be used. See Defining a sampling scheme for more details on this.
+`sampling_scheme`: Path to the sampling scheme that will be used. See below "Defining a sampling scheme" for more details on this.
 
 `database`: Sample from `"GenBank"` or `"RefSeq"`.
 
 __Example__
 
-In the example below we will sample one taxa from each defined phylum in the RefSeq-database.
+In the example below, TADA will sample one taxa from each defined phylum in the RefSeq-database.
 
 ```
 sample_ncbi:
@@ -103,7 +103,7 @@ sample_gtdb:
     version: <str>
 ```
 
-`sampling_scheme`: Path to the sampling scheme that will be used. See Defining a sampling scheme for more details on this.
+`sampling_scheme`: Path to the sampling scheme that will be used. See below "Defining a sampling scheme" for more details on this.
 
 `completeness`: Exclude taxa with a completeness estimate less than this value (Default: `0`).
 
@@ -111,14 +111,14 @@ sample_gtdb:
 
 `gtdb_species_representative`: False will keep all entries while True will only keep entries that are classified as GTDB species representatives.
 
-`version:` Select which version of GTDB to use, `207` and `214` are supported (Default: `214`).
+`version:` Select which version of GTDB to use. E.g. `207` and `214` are supported (Default: `214`).
 
 __Example__
 
 In the example below we will use the sampling scheme defined in `config/sampling_scheme.basic.yaml`. For this example the workflow will sample three taxa for each phylum, but only sample from representative species with an estimated completeness over 90% and an estimated contamination under 5%.
 
 ```
-subsample_gtdb:
+sample_gtdb:
   sampling_scheme "../config/sampling_scheme.basic.yaml"
   completeness: 90
   contamination: 5
@@ -147,7 +147,7 @@ prune_gtdb:
 
 `contamination`: Exclude taxa with a contamination estimate larger than this value (Default: `100`).
 
-`prune_method`: Select what method to use for pruning, `"shortest"` will keep the taxa with the shortest branch in a leaf-pair, `"longest"` will keep the taxa with the longest branch in a leaf-pair, and `"random"` will randomly select the taxa to keep in a leaf-pair (Default: `"shortest"`).
+`prune_method`: Select what method to use for pruning, `"shortest"` will keep the taxon with the shortest branch in a leaf-pair, `"longest"` will keep the taxon with the longest branch in a leaf-pair, and `"random"` will randomly select one of the taxa to keep in a leaf-pair (Default: `"shortest"`).
 
 `version:` Select which version of GTDB to use, `207` and `214` are supported (Default: `214`).
 
@@ -166,7 +166,7 @@ prune_gtdb:
 
 ## Defining a sampling scheme
 
-The sampling is based on a sampling scheme that is defined in a YAML-file with a structure described below. Examples of sampling schemes can be found in the config-directory.
+The taxonomic sampling (`sample_gtdb` or `sample_ncbi`) is based on a sampling scheme that is defined in a YAML-file with a structure described below. Examples of sampling schemes can be found in the config-directory.
 
 ```
 taxonomic_name:
@@ -175,9 +175,12 @@ taxonomic_name:
 ```
 `taxonomic_name`: The name of the taxa to sample from. The name has to be  defined in the GTDB or NCBI taxonomy, depending on which database to sample from. The key-word `all` can be used to sample from all Bacteria and Archaea.
 
-`sampling_level`: The taxonomic level to perform the sampling at.
+`sampling_level`: The taxonomic level to perform the sampling at. 
 
 `taxa`: The number of taxa we want to sample from each group at that taxonomic level. The key-word `all` can also be used, this will keep all taxa in the groups.
+
+Thus, if `taxonomic_name` is set to `Bacteria`, `sampling_level` to `class`, and `taxa` to 3, TADA till sample 3 taxa in each class of the Bacteria.
+
 
 __Example: Basic sampling scheme__
 
