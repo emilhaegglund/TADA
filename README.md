@@ -29,7 +29,7 @@ The first option is to set the path to the output-directory:
 workdir: "results"
 ```
 
-### Sampling methods
+### Choice of sampling method
 The workflow can be run using three different methods:
 * Sampling based on the NCBI taxonomy.
 * Sampling based on the GTDB taxonomy.
@@ -47,19 +47,21 @@ A random seed can be used to reproduce the output of sampling and pruning from t
 seed:42
 ```
 
-### Select output
-There are several output options for TADA. First we can select if the workflow should download genomes, cds, or proteomes for the sampled genomes. If all options below are set to False, the workflow will stop after the sampling procedure. If an annotation does not exist for a sampled taxa, the genome will be annotated using Prokka.
+### Select what to download
+TADA can download genomes, CDS (genes), and/or proteomes for the sampled genomes. If all options below are set to False, the workflow will stop after the sampling procedure. TADA will annotate genomes for which no annotation is available using [Prokka](https://github.com/tseemann/prokka).
 
 ```
-download_genomes: False
-download_cds: False
-download_proteomes: True
+downloads: 
+  genomes: False
+  cds: False
+  proteomes: True
 ```
 
-We can also make the workflow build different type of Blast-databases, either using the [NCBI Blast](https://blast.ncbi.nlm.nih.gov/doc/blast-help/downloadblastdata.html#blast-executables) suite or [Diamond](https://github.com/bbuchfink/diamond).
+### Select what databases to create
+TADA can also build different type of Blast-compatible databases, either using the [NCBI Blast](https://blast.ncbi.nlm.nih.gov/doc/blast-help/downloadblastdata.html#blast-executables) suite or [Diamond](https://github.com/bbuchfink/diamond) (only for proteins).
 
 ```
-output:
+databases:
     blast_genomes: False
     blast_cds: False
     blast_protein: False
@@ -67,7 +69,29 @@ output:
 ```
 
 ### Options for sampling
-Next follows option that are specific to the different sampling methods listed above.
+Next follows options specific to the different sampling methods listed above.
+
+__Options for sampling from the NCBI Taxonomy__
+
+To sample from the NCBI Taxonomy we have to give the path to a sampling scheme and we also need to define if we want to sample from GenBank or RefSeq. Sampling from NCBI is restricted to taxa classified as Bacteria or Archaea. The reason for this is that the annotation software in the workflow are for prokaryotic genomes.
+```
+sample_ncbi:
+    sampling_scheme: <path>
+    database: <string>
+```
+`sampling_scheme`: Path to the sampling scheme that will be used. See Defining a sampling scheme for more details on this.
+
+`database`: Sample from `"GenBank"` or `"RefSeq"`.
+
+__Example__
+
+In the example below we will sample one taxa from each defined phylum in the RefSeq-database.
+
+```
+sample_ncbi:
+    sampling_scheme: "../config/sampling_scheme.ncbi_refseq.yaml"
+    source: RefSeq
+```
 
 __Options for sampling the GTDB Taxonomy__
 ```
@@ -138,28 +162,6 @@ prune_gtdb:
   completeness: 90
   contamination: 5
   prune_method: "shortest"
-```
-
-__Options for sampling from the NCBI Taxonomy__
-
-To sample from the NCBI Taxonomy we have to give the path to a sampling scheme and we also need to define if we want to sample from GenBank or RefSeq. Sampling from NCBI is restricted to taxa classified as Bacteria or Archaea. The reason for this is that the annotation software in the workflow are for prokaryotic genomes.
-```
-sample_ncbi:
-    sampling_scheme: <path>
-    source: <string>
-```
-`sampling_scheme`: Path to the sampling scheme that will be used. See Defining a sampling scheme for more details on this.
-
-`source`: Sample from `"GenBank"` or `"RefSeq"`.
-
-__Example__
-
-In the example below we will sample one taxa from each defined phylum in the RefSeq-database.
-
-```
-sample_ncbi:
-    sampling_scheme: "../config/sampling_scheme.ncbi_refseq.yaml"
-    source: RefSeq
 ```
 
 ## Defining a sampling scheme
