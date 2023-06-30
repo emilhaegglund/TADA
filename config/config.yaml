@@ -17,22 +17,24 @@ downloads:
 
 # Set what type of sequence database to generate.
 databases:
-  blast_genome: True
-  blast_cds: True
-  blast_protein: True
-  diamond_protein: True
+  blast_genome: False
+  blast_cds: False
+  blast_protein: False
+  diamond_protein: False
 
 # Options for sampling based on NCBI-taxonomy
 sample_ncbi:
   # Path to sampling scheme
-  sampling_scheme: "/data/emil/SDBW/config/sampling_scheme.basic.yaml"
+  # Absolute path or relative to workdir
+  sampling_scheme: "../../config/sampling_scheme.basic.yaml"
   # What DB in NCBI to use, can be "RefSeq" or "GenBank"
   database: "RefSeq"
 
 # Options for sampling based on GTDB-taxonomy
 sample_gtdb:
   # Path to sampling scheme
-  sampling_scheme: "/data/emil/SDBW/config/sampling_scheme.basic.yaml"
+  # Absolute path or relative to workdir
+  sampling_scheme: "../../config/sampling_scheme.basic.yaml"
   # Discard genomes with completeness less than this value
   completeness: 50
   # Discard genomes with contamination larger than this value

@@ -1,22 +1,25 @@
 # TADA - Taxonomic Aware Dataset Assembly
-A Snakemake workflow to assemble dataset for comperative and phylogenetic analysis of bacteria and archaea. Datasets can be generated based on taxonomic information from [NCBI](https://www.ncbi.nlm.nih.gov/taxonomy), or taxonomic or phylogenomic information from [GTDB](https://gtdb.ecogenomic.org).
+A Snakemake workflow to assemble balanced, representative and manageable datasets for comparative and phylogenetic analysis of bacteria and archaea. Datasets can be generated based either on the phylogenomic tree offered by [GTDB](https://gtdb.ecogenomic.org) , or on the taxonomy offered by GTDB or by [NCBI](https://www.ncbi.nlm.nih.gov/taxonomy).
+
+## Dependency
+Running the TADA-workflow requires [Conda](https://docs.conda.io/projects/conda/en/stable/).
+
 
 ## Installing
-Running the TADA-workflow requires Conda. First clone the repository from git
-and change into the TADA directory.
+Clone the repository from git and change into the TADA directory.
 
 ```
 git clone https://github.com/emilhaegglund/TADA.git
 cd TADA
 ```
 
-The next steps requires that you have [Conda](https://docs.conda.io/en/latest/) installed on the system. If not follow the link and install it.
-Next, run the following commands to install Mamba and Snakemake in an environment called `tada`, and then activate the ennvironment.
+Install and activate the conda environment from which the
+workflow will be run. This will install Mamba and Snakemake.
+
 ```
 conda env create -f environment.yaml
 conda activate tada
 ```
-You are now ready to use TADA. As a quick test to see that everything works you can try run some of the [examples](https://github.com/emilhaegglund/TADA/tree/main/examples).
 
 ## Setting up the configuration file
 Before running the workflow, the first step is to set up the configuration file. This file will determine the behavior of the workflow. An example of the configuration file can be found in `config/config.yaml`. You can either modify this file or create a new. The location of the config-file must be specified using the `--configfile` option when running Snakemake.
@@ -26,13 +29,13 @@ The first option is to set the path to the output-directory:
 workdir: "results"
 ```
 
-### Sampling methods
+### Choice of sampling method
 The workflow can be run using three different methods:
-* Sampling based on the NCBI taxonomy.
-* Sampling based on the GTDB taxonomy.
-* Sampling based on the GTDB phylogeny.
+* Sampling based on the NCBI taxonomy (`sample_ncbi`).
+* Sampling based on the GTDB taxonomy (`sample_gtdb`).
+* Sampling based on the GTDB phylogeny (`prune_gtdb`).
 
-To determine which sampling method to use select one of the following option: `sample_ncbi`, `sample_gtdb`, or `prune_gtdb`.
+E.g.:
 
 ```
 method: "sample_gtdb"
@@ -41,24 +44,24 @@ method: "sample_gtdb"
 A random seed can be used to reproduce the output of sampling and pruning from the GTDB-database.
 
 ```
-seed: 42
+seed:42
 ```
 
-### Select output
-There are several output options for TADA. First we can select if the workflow should download genomes, cds, or proteomes for the sampled genomes. If gene and protein sequences is not provided in NBCI for a sampled taxa, the genome will be downloaded and annotated using Prokka.
+### Select what to download
+TADA can download genomes, CDS (genes), and/or proteomes for the sampled genomes. If all options below are set to False, the workflow will stop after the sampling procedure. TADA will annotate genomes for which no annotation is available using [Prokka](https://github.com/tseemann/prokka).
 
 ```
 downloads:
-    genomes: False
-    cds: False
-    proteomes: True
+  genomes: False
+  cds: False
+  proteomes: True
 ```
-If all the download options are set to `False`, TADA will stop after the sampling procedure.
 
-We can also make the workflow build different type of Blast-databases based on the downloaded data, either using the [NCBI Blast](https://blast.ncbi.nlm.nih.gov/doc/blast-help/downloadblastdata.html#blast-executables) suite or [Diamond](https://github.com/bbuchfink/diamond).
+### Select what databases to create
+TADA can also build different type of Blast-compatible databases, either using the [NCBI Blast](https://blast.ncbi.nlm.nih.gov/doc/blast-help/downloadblastdata.html#blast-executables) suite or [Diamond](https://github.com/bbuchfink/diamond) (only for proteins).
 
 ```
-output:
+databases:
     blast_genomes: False
     blast_cds: False
     blast_protein: False
@@ -66,7 +69,29 @@ output:
 ```
 
 ### Options for sampling
-Next follows option that are specific to the different sampling methods listed above.
+Next follows options specific to the different sampling methods listed above.
+
+__Options for sampling from the NCBI Taxonomy__
+
+To sample from the NCBI Taxonomy we have to give the path to a sampling scheme and we also need to define if we want to sample from GenBank or RefSeq. Sampling from NCBI is restricted to taxa classified as Bacteria or Archaea. The reason for this is that the annotation software in the workflow are for prokaryotic genomes.
+```
+sample_ncbi:
+    sampling_scheme: <path>
+    database: <string>
+```
+`sampling_scheme`: Path to the sampling scheme that will be used. See below "Defining a sampling scheme" for more details on this.
+
+`database`: Sample from `"GenBank"` or `"RefSeq"`.
+
+__Example__
+
+In the example below, TADA will sample one taxa from each defined phylum in the RefSeq-database.
+
+```
+sample_ncbi:
+    sampling_scheme: "../config/sampling_scheme.ncbi_refseq.yaml"
+    source: RefSeq
+```
 
 __Options for sampling the GTDB Taxonomy__
 ```
@@ -78,7 +103,7 @@ sample_gtdb:
     version: <str>
 ```
 
-`sampling_scheme`: Path to the sampling scheme that will be used. See Defining a sampling scheme for more details on this.
+`sampling_scheme`: Path to the sampling scheme that will be used. See below "Defining a sampling scheme" for more details on this.
 
 `completeness`: Exclude taxa with a completeness estimate less than this value (Default: `0`).
 
@@ -86,14 +111,14 @@ sample_gtdb:
 
 `gtdb_species_representative`: False will keep all entries while True will only keep entries that are classified as GTDB species representatives.
 
-`version:` Select which version of GTDB to use, `207` and `214` are supported (Default: `214`).
+`version:` Select which version of GTDB to use. E.g. `207` and `214` are supported (Default: `214`).
 
 __Example__
 
 In the example below we will use the sampling scheme defined in `config/sampling_scheme.basic.yaml`. For this example the workflow will sample three taxa for each phylum, but only sample from representative species with an estimated completeness over 90% and an estimated contamination under 5%.
 
 ```
-subsample_gtdb:
+sample_gtdb:
   sampling_scheme "../config/sampling_scheme.basic.yaml"
   completeness: 90
   contamination: 5
@@ -122,13 +147,13 @@ prune_gtdb:
 
 `contamination`: Exclude taxa with a contamination estimate larger than this value (Default: `100`).
 
-`prune_method`: Select what method to use for pruning, `"shortest"` will keep the taxa with the shortest branch in a leaf-pair, `"longest"` will keep the taxa with the longest branch in a leaf-pair, and `"random"` will randomly select the taxa to keep in a leaf-pair (Default: `"shortest"`).
+`prune_method`: Select what method to use for pruning, `"shortest"` will keep the taxon with the shortest branch in a leaf-pair, `"longest"` will keep the taxon with the longest branch in a leaf-pair, and `"random"` will randomly select one of the taxa to keep in a leaf-pair (Default: `"shortest"`).
 
 `version:` Select which version of GTDB to use, `207` and `214` are supported (Default: `214`).
 
 __Example__
 
-In the example below, TADA will first remove all taxa with an estimated completeness under 90% and an estimated contamination over 5%. It will then continue to prune the bacterial phylogeny untill 1000 taxa remains. For the archaeal phylogeny it will prune the phylogeny until 200 taxa remains.
+In the example belwo TADA will first remove all taxa with an estimated completeness under 90% and an estimated contamination over 5%. It will then continue to prune the bacterial phylogeny untill 1000 taxa remains. For the archaeal phylogeny it will prune the phylogeny until 200 taxa remains.
 
 ```
 prune_gtdb:
@@ -139,31 +164,9 @@ prune_gtdb:
   prune_method: "shortest"
 ```
 
-__Options for sampling from the NCBI Taxonomy__
-
-To sample from the NCBI Taxonomy we have to give the path to a sampling scheme and we also need to define if we want to sample from GenBank or RefSeq. Sampling from NCBI is restricted to taxa classified as Bacteria or Archaea. The reason for this is that the annotation software in the workflow are for prokaryotic genomes.
-```
-sample_ncbi:
-    sampling_scheme: <path>
-    source: <string>
-```
-`sampling_scheme`: Path to the sampling scheme that will be used. See [Defining a sampling scheme](##defining-a-sampling-scheme) for more details on this.
-
-`source`: Sample from `"GenBank"` or `"RefSeq"`.
-
-__Example__
-
-In the example below we will sample one taxa from each defined phylum in the RefSeq-database.
-
-```
-sample_ncbi:
-    sampling_scheme: "../config/sampling_scheme.ncbi_refseq.yaml"
-    source: RefSeq
-```
-
 ## Defining a sampling scheme
 
-The sampling is based on a sampling scheme that is defined in a YAML-file with a structure described below. Examples of sampling schemes can be found in the config-directory.
+The taxonomic sampling (`sample_gtdb` or `sample_ncbi`) is based on a sampling scheme that is defined in a YAML-file with a structure described below. Examples of sampling schemes can be found in the config-directory.
 
 ```
 taxonomic_name:
@@ -175,6 +178,9 @@ taxonomic_name:
 `sampling_level`: The taxonomic level to perform the sampling at.
 
 `taxa`: The number of taxa we want to sample from each group at that taxonomic level. The key-word `all` can also be used, this will keep all taxa in the groups.
+
+Thus, if `taxonomic_name` is set to `Bacteria`, `sampling_level` to `class`, and `taxa` to 3, TADA till sample 3 taxa in each class of the Bacteria.
+
 
 __Example: Basic sampling scheme__
 
