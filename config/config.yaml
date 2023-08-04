@@ -1,15 +1,15 @@
 # Config file to sample sequence databases
-workdir: "sample_ncbi"
+workdir: "sample_gtdb"
 
 # Set which sampling method to use
 # Possible options are "sample_ncbi", "sample_gtdb", or "prune_gtdb"
-method: "sample_ncbi"
+method: "sample_gtdb"
 
 # Random seed to use for sampling processes
 seed: 42
 
 # Path to file containing list of genome accessions to be included in the final dataset
-required: "../../config/required-genomes.txt"
+#required: "../../config/required-genomes.txt"
 
 # Set what files to download for each genome.
 # If all set to false, the workflow will stop after sampling.
