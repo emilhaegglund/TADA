@@ -16,11 +16,6 @@ if "sample_gtdb" not in config.keys():
                             "gtdb_species_representative": False
                             }
 
-#if config["sample_gtdb"]["gtdb_species_representative"]:
-#    config["sample_gtdb"]["gtdb_species_representative_opt"] = "--gtdb-representative"
-#else:
-#    config["sample_gtdb"]["gtdb_species_representative_opt"] = ""
-
 rule prune_gtdb_phylogeny:
     input:
         phylogeny="gtdb_data/{domain}_r{version}.tree",
@@ -63,7 +58,8 @@ rule subsample_gtdb:
     Use the metadata and taxonomy information to subsample the gtdb-data.
     """
     input:
-        metadata=subsample_input
+        metadata=subsample_input,
+        required_genomes="ncbi_data/required_genomes_checked.tsv" if config["required"] != "" else []
     output:
         "sample_gtdb.metadata.tsv"
     params:
@@ -71,7 +67,7 @@ rule subsample_gtdb:
         completeness=config["sample_gtdb"]["completeness"],
         contamination=config["sample_gtdb"]["contamination"],
         gtdb_representative=config["sample_gtdb"]["gtdb_species_representative"],
-        seed=config["seed"]
+        seed=config["seed"],
     script:
         "../scripts/subsample_gtdb_taxonomy.py"
 

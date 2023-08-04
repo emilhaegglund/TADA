@@ -6,7 +6,7 @@ if config["downloads"]["genomes"]:
 if config["downloads"]["cds"]:
     config["include"].append("cds")
 config["include"] = ",".join(config["include"])
-print(config["include"])
+
 # Genomes wiht annotation
 def get_genomes_with_annotation(wildcards):
     ck_output = checkpoints.get_genomes_w_annotation.get(**wildcards).output[0]

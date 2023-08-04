@@ -1,5 +1,5 @@
 if "sample_ncbi" not in config.keys():
-    config["sample_ncbi"] = {"sampling_scheme": "", "source": "GenBank"}
+    config["sample_ncbi"] = {"sampling_scheme": "", "database": "GenBank"}
 
 TAXA = []
 if config["method"] == "sample_ncbi":
@@ -12,7 +12,7 @@ rule download_summary:
     output:
         "ncbi_data/{taxa}.tsv"
     params:
-        source=config["sample_ncbi"]["source"]
+        source=config["sample_ncbi"]["database"]
     conda:
         "../envs/ncbi-datasets.yaml"
     shell:
@@ -77,7 +77,7 @@ rule download_taxdmp:
     shell:
         "wget -P {params.output_dir} https://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip && unzip {params.output_dir}/taxdmp.zip -d {params.output_dir}/taxdmp"
 
-# Check tat required genomes exists and that they are in Archaea or Bacteria
+# Check required genomes exists and that they are in Archaea or Bacteria
 rule get_required_genomes_taxid:
     input:
         config["required"]
@@ -101,6 +101,6 @@ rule check_required_genomes_for_euk:
     params:
         context="required_genomes"
     output:
-        dataset = "ncbi_data/required_genomes.tsv"
+        dataset = "ncbi_data/required_genomes_checked.tsv"
     script:
         "../scripts/check_for_non_supported_taxa.py"

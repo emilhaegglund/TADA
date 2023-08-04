@@ -49,6 +49,7 @@ def get_taxa_level_index(taxa, taxa_levels, df):
 ncbi_metadat_path = snakemake.input.metadata
 names_path = snakemake.input.names
 nodes_path = snakemake.input.nodes
+required_genomes_path = snakemake.input.required_genomes
 sampling_scheme_path = snakemake.params.sampling_scheme
 seed = snakemake.params.seed
 output_path = snakemake.output[0]
@@ -56,19 +57,6 @@ output_path = snakemake.output[0]
 assemblies_df = pd.read_csv(
     ncbi_metadat_path, sep="\t", comment="#", low_memory=False
 )
-
-# Clear all entries that does not have an ftp-path
-#assemblies_df = assemblies_df.dropna(subset=["ftp_path"])
-
-#assemblies_historical_df = pd.read_csv(
-#    args.historical,
-#    sep="\t",
-#    comment="#",
-#    names=header,
-#)
-
-#historical_accessions = assemblies_historical_df["assembly_accession"].to_list()
-#assemblies_df = assemblies_df[~assemblies_df["assembly_accession"].isin(historical_accessions)]
 
 
 taxa_levels = ["domain", "phylum", "class", "order", "family", "genus", "species"]
@@ -100,6 +88,22 @@ taxonomy_df = pd.DataFrame(data, columns=["taxid"] + taxa_levels[::-1])
 taxonomy_df.to_csv("test.taxonomy.tsv", sep="\t", index=False)
 taxonomy_df.drop_duplicates(inplace=True)
 df = pd.merge(left=assemblies_df, right=taxonomy_df, on="taxid")
+df = df.rename(columns={"assembly_accession":"accession"})
+
+# Extract data for required genomes, this has to be done before all
+# other filtering steps.
+# If no required file has been given, the input type is not string
+if type(required_genomes_path) == str:
+    required_genomes_df = pd.read_csv(required_genomes_path, sep="\t")
+    required_accessions = required_genomes_df["Assembly Accession"].to_list()
+    all_accessions = df["accession"].to_list()
+    print(all_accessions[:10])
+    for accession in required_accessions:
+        if accession not in all_accessions:
+            print(f"{accession} not in X")
+            sys.exit(1)
+
+    required_genomes_df = pd.merge(left=required_genomes_df, right=df, left_on="Assembly Accession", right_on="accession")
 
 with open(sampling_scheme_path, "r") as stream:
     sampling_scheme = yaml.safe_load(stream)
@@ -130,7 +134,7 @@ for taxa in sampling_scheme:
         else:
             sys.exit("{taxa} is of rank {taxa_rank}, not possible to sample at the higher rank {sampling_rank}".format(taxa=taxa, taxa_rank=taxa_levels[taxa_level_index], sampling_rank=sampling_level))
     else:
-        sys.exit("{taxa} is not a valid taxonomic name in NCBI".format(taxa=taxa))
+        sys.exit(f"{taxa} is not a valid taxonomic name in NCBI")
 
 # Reorder the sampling dictionary so tha we start sampling from species level and the continue
 # with higher levels
@@ -146,6 +150,8 @@ for taxa_level_index in sampling_order.keys():
         taxa = sampling[0]
         sampling_level = sampling[1]
         n_taxa = sampling[2]
+        if n_taxa == 'all':
+            n_taxa = 0
 
         # Create a dataframe to sample from based on the selected taxa
         sampling_df = df[df[taxa_level] == taxa]
@@ -171,10 +177,32 @@ for taxa_level_index in sampling_order.keys():
 
         # Group the sampling dataframe based on the sampling level
         for i, taxa_level_df in sampling_df.groupby(sampling_level):
+
+            sample_n_taxa = n_taxa
+            # First extract and count required genomes
+            if type(snakemake.input.required_genomes) == str:
+                tmp_df = required_genomes_df[required_genomes_df[sampling_level] == i]
+                if tmp_df.shape[0] > 0:
+
+                    # Update the number of genomes that must be sampled
+                    # after required genomes have been included and add
+                    # required genomes to the sampled dataframe.
+                    sampled_dfs.append(tmp_df)
+                    sample_n_taxa = n_taxa - tmp_df.shape[0]
+
+                    # Remove required genomes from taxa_level_df so that
+                    # they are not included in the sampling.
+                    tmp_df_accessions = tmp_df["accession"].to_list()
+                    taxa_level_df = taxa_level_df[~taxa_level_df["accession"].isin(tmp_df_accessions)]
+                    # Skip sampling if the number of required genomes are covering
+                    # the number of genomes that should have been sampled.
+                    if sample_n_taxa <= 0:
+                        continue
+
             # Can't take a sample if the sample size we ask for is larger than
             # the number of taxa in that group. In that case, use all taxa in
             # the group.
-            if n_taxa == 'all': # Get all
+            if n_taxa == 0: # Get all
                 sampled_dfs.append(taxa_level_df)
             elif taxa_level_df.shape[0] > n_taxa: # Sample
                 if "sampling_prob" in taxa_level_df.columns:
