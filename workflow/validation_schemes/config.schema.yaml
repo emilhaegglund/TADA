@@ -14,6 +14,10 @@ properties:
     type: integer
     description: value for random seed to use in pruning and sampling step
     default: 42
+  required:
+    type: string
+    description: path to file containing user defined genome accessions to be included in the final dataset
+    default: ""
 
   download:
     description: select what type of sequence files to downloads, if all false, workflow will stop after sampling

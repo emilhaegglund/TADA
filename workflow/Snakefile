@@ -14,6 +14,7 @@ def all_input(wildcards):
         for taxa in sampling_scheme.keys():
             wanted_input.append(os.path.join("ncbi_data", taxa.replace(" ", "_") + ".tsv"))
         wanted_input.append(os.path.join("ncbi_data", "datasets.tsv"))
+        wanted_input.append("sample_ncbi.annotation_data.tsv")
 
     if config["method"] == "sample_gtdb":
         wanted_input.append("sample_gtdb.annotation_data.tsv")

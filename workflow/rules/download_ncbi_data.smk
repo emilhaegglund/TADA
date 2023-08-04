@@ -1,5 +1,5 @@
 if "sample_ncbi" not in config.keys():
-    config["sample_ncbi"] = {"sampling_scheme": "", "source": "GenBank"}
+    config["sample_ncbi"] = {"sampling_scheme": "", "database": "GenBank"}
 
 TAXA = []
 if config["method"] == "sample_ncbi":
@@ -12,7 +12,7 @@ rule download_summary:
     output:
         "ncbi_data/{taxa}.tsv"
     params:
-        source=config["sample_ncbi"]["source"]
+        source=config["sample_ncbi"]["database"]
     conda:
         "../envs/ncbi-datasets.yaml"
     shell:
@@ -39,6 +39,8 @@ rule check_for_euk:
     input:
         dataset = "ncbi_data/datasets_unchecked.tsv",
         nodes = "ncbi_data/taxdmp/nodes.dmp"
+    params:
+        context = "sampling_scheme"
     output:
         dataset = "ncbi_data/datasets.tsv"
     script:
@@ -74,3 +76,31 @@ rule download_taxdmp:
         output_dir="ncbi_data/"
     shell:
         "wget -P {params.output_dir} https://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip && unzip {params.output_dir}/taxdmp.zip -d {params.output_dir}/taxdmp"
+
+# Check required genomes exists and that they are in Archaea or Bacteria
+rule get_required_genomes_taxid:
+    input:
+        config["required"]
+    output:
+        "ncbi_data/required_genomes_unchecked.tsv"
+    conda:
+        "../envs/ncbi-datasets.yaml"
+    log:
+        dataset="logs/get_required_genomes_taxid_dataset.log",
+        dataformat="logs/get_required_genomes_taxid_dataformat.log"
+    shell:
+        """
+        datasets summary genome accession --inputfile {input} --as-json-lines 2> {log.dataset} | \
+        dataformat tsv genome  --fields accession,organism-tax-id > {output} 2> {log.dataformat}
+        """
+
+rule check_required_genomes_for_euk:
+    input:
+        dataset = "ncbi_data/required_genomes_unchecked.tsv",
+        nodes = "ncbi_data/taxdmp/nodes.dmp"
+    params:
+        context="required_genomes"
+    output:
+        dataset = "ncbi_data/required_genomes_checked.tsv"
+    script:
+        "../scripts/check_for_non_supported_taxa.py"

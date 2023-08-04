@@ -3,6 +3,7 @@ rule subsample_assembly_summary:
         metadata="ncbi_data/datasets.tsv",
         names="ncbi_data/taxdmp/names.dmp",
         nodes="ncbi_data/taxdmp/nodes.dmp",
+        required_genomes="ncbi_data/required_genomes_checked.tsv" if config["required"] != "" else []
     output:
         "sample_ncbi.annotation_data.tsv"
     params:
