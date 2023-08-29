@@ -17,49 +17,61 @@ def all_input(wildcards):
         wanted_input.append("sample_ncbi.annotation_data.tsv")
 
     if config["method"] == "sample_gtdb":
-        wanted_input.append("sample_gtdb.annotation_data.tsv")
+        #wanted_input.append("sample_gtdb.annotation_data.tsv")
+        wanted_input.append("sample_gtdb.metadata.tsv")
+
     if config["method"] == "prune_gtdb":
         gtdb_version = str(config["prune_gtdb"]["version"])
-        wanted_input.append(os.path.join("prune_gtdb.bac120_r" + gtdb_version + ".nwk"))
-        wanted_input.append(os.path.join("prune_gtdb.bac120_r" + gtdb_version + ".metadata.tsv"))
-        wanted_input.append(os.path.join("prune_gtdb.ar53_r" + gtdb_version + ".nwk"))
-        wanted_input.append(os.path.join("prune_gtdb.ar53_r" + gtdb_version + ".metadata.tsv"))
+        wanted_input.append("prune_gtdb.metadata.tsv")
 
     # Handle download options
-    if config["downloads"]["genomes"]:
-        wanted_input.append("genomes")
-    if config["downloads"]["cds"]:
-        wanted_input.append("cds")
-    if config["downloads"]["proteomes"]:
-        wanted_input.append("proteomes")
+    if "genomes" in config["downloads"]:
+        if config["downloads"]["genomes"]:
+            wanted_input.append("genomes")
+    if "cds" in config["downloads"]:
+        if config["downloads"]["cds"]:
+            wanted_input.append("cds")
+    if "proteomes" in config["downloads"]:
+        if config["downloads"]["proteomes"]:
+            print("download proteomes")
+            wanted_input.append("proteomes")
 
     # Handle blast databases options
-    if config["databases"]["diamond_protein"] and config["downloads"]["proteomes"]:
-        if config["downloads"]["proteomes"]:
-            wanted_input.append(os.path.join('databases', 'diamond_proteomes_db', "sdbw_proteomes.dmnd"))
-        else:
-            print("Building Diamond-database require turning the download proteome option to True")
-    if config["databases"]["blast_protein"]:
-        if config["downloads"]["proteomes"]:
-            wanted_input.append(os.path.join('databases', 'blast_proteomes_db', "sdbw_proteomes.pdb"))
-        else:
-            print("Building Blast protein-database require turning the download proteome option to True")
-    if config["databases"]['blast_genome']:
-        if config["downloads"]["genomes"]:
-            wanted_input.append(os.path.join('databases', 'blast_genomes_db', "sdbw_genomes.ndb"))
-        else:
-            print("Building Blast genome-database require turning the download genomes option to True")
-    if config["databases"]['blast_cds']:
-        if config["downloads"]["cds"]:
-            wanted_input.append(os.path.join('databases', 'blast_cds_db', "sdbw_cds.ndb"))
-        else:
-            print("Building Blast cds-database require turning the download cds option to True")
+    if "databases" in config:
+        if config["databases"]["diamond_protein"] and config["downloads"]["proteomes"]:
+            if config["downloads"]["proteomes"]:
+                wanted_input.append(os.path.join('databases', 'diamond_proteomes_db', "sdbw_proteomes.dmnd"))
+            else:
+                print("Building Diamond-database require turning the download proteome option to True")
+        if config["databases"]["blast_protein"]:
+            if config["downloads"]["proteomes"]:
+                wanted_input.append(os.path.join('databases', 'blast_proteomes_db', "sdbw_proteomes.pdb"))
+            else:
+                print("Building Blast protein-database require turning the download proteome option to True")
+        if config["databases"]['blast_genome']:
+            if config["downloads"]["genomes"]:
+                wanted_input.append(os.path.join('databases', 'blast_genomes_db', "sdbw_genomes.ndb"))
+            else:
+                print("Building Blast genome-database require turning the download genomes option to True")
+        if config["databases"]['blast_cds']:
+            if config["downloads"]["cds"]:
+                wanted_input.append(os.path.join('databases', 'blast_cds_db', "sdbw_cds.ndb"))
+            else:
+                print("Building Blast cds-database require turning the download cds option to True")
     return wanted_input
 
 # Validate config-file
 validate(config, schema="validation_schemes/config.schema.yaml")
 
+# Update path to sampling scheme so it is uses absolute path
+for method in ["sample_gtdb", "sample_ncbi"]:
+    if method in config:
+        config[method]["sampling_scheme"] = os.path.abspath(config[method]["sampling_scheme"])
+
+# Set workdir
 workdir: config['workdir']
+
+# Include rules
 include: "rules/download_gtdb_data.smk"
 include: "rules/download_ncbi_data.smk"
 if config["method"] in ["sample_gtdb", "prune_gtdb"]:
@@ -67,5 +79,6 @@ if config["method"] in ["sample_gtdb", "prune_gtdb"]:
 include: "rules/ncbi_taxonomy.smk"
 include: "rules/download_sampled_data.smk"
 
+# Generate input
 rule all:
     input: all_input

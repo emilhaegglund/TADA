@@ -11,13 +11,19 @@ def calculate_distance(node):
         distance = sum([node.get_distance(child) for child in child_nodes])
         return (distance, node)
 
+# Snakemake input arguments
 phylogeny_path = snakemake.input.phylogeny
 metadata_path = snakemake.input.metadata
+
+# Snakemake params arguments
 nr_taxa = snakemake.params.taxa
 completeness = float(snakemake.params.completeness)
 contamination = float(snakemake.params.contamination)
 prune_method = snakemake.params.prune_method
 random.seed(int(snakemake.params.seed))
+taxon = snakemake.params.taxon
+
+# Snakemake output arguments
 output_metadata = snakemake.output.metadata
 output_phylogeny = snakemake.output.phylogeny
 
@@ -41,13 +47,6 @@ df["species"] = df["species"].str.replace("s__", "")
 
 df = df[df['accession'].isin(tree.get_leaf_names())]
 
-df = df[
-    (df.checkm_contamination <= contamination)
-    & (df.checkm_completeness >= completeness)
-]
-
-clean_accessions = list(set(df['accession'].to_list()))
-
 # If we ask for 0 taxa, we still require the output-files for downstream
 # steps of the workflow.
 if nr_taxa == 0:
@@ -57,11 +56,32 @@ if nr_taxa == 0:
         pass
     sys.exit()
 
+# Quality filter
+df = df[
+    (df.checkm_contamination <= contamination)
+    & (df.checkm_completeness >= completeness)
+]
+
+# Taxon filter
+if taxon != "":
+    found = False
+    for rank in ["domain", "phylum", "class", "order", "family", "genus", "species"]:
+        if taxon in df[rank].unique():
+            df = df[df[rank] == taxon]
+            found = True
+    if not found:
+        print(f"{taxon} not found, check spelling and make sure to sample sequences only from Bacteria/Archaea.")
+        sys.exit(1)
+
+# Get accessions to keep
+clean_accessions = list(set(df['accession'].to_list()))
+
+
 orig_tree_size = len(set(tree.get_leaf_names()))
-print(f"Tree size: {orig_tree_size}")
+print(f"Original tree size: {orig_tree_size}")
 tree.prune(clean_accessions, preserve_branch_length=True)
 filt_tree_size = len(set(tree.get_leaf_names()))
-print(f"Tree size after filtering out taxa: {filt_tree_size}")
+print(f"Tree size after filtering: {filt_tree_size}")
 
 # Compute distance between each sister leaf-pair
 print('Calculate pair-wise distances')

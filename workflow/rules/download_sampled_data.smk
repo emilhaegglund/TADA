@@ -1,9 +1,9 @@
 config["include"] = []
-if config["downloads"]["proteomes"]:
+if "proteomes" in config["downloads"]:
     config["include"].append("protein")
-if config["downloads"]["genomes"]:
+if "genomes" in config["downloads"]:
     config["include"].append("genome")
-if config["downloads"]["cds"]:
+if "cds" in config["downloads"]:
     config["include"].append("cds")
 config["include"] = ",".join(config["include"])
 
@@ -198,7 +198,7 @@ rule collect_proteomes:
     output:
         directory("proteomes/")
     script:
-        "../scripts/link_files.py"
+        "../scripts/move_files.py"
 
 rule collect_cds:
     input:
