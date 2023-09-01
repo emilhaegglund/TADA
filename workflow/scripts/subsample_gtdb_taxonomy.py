@@ -1,3 +1,4 @@
+from types import NoneType
 import pandas as pd
 import yaml
 import sys
@@ -90,6 +91,10 @@ if gtdb_representative:
 taxa_levels = ["domain", "phylum", "class", "order", "family", "genus", "species"]
 sampling_order = {}  # Store sampling parameters
 
+if sampling_scheme is None:
+    print("in if")
+    sampling_scheme = {}
+print(sampling_scheme)
 if "all" in sampling_scheme.keys():
     sampling_parameters = sampling_scheme["all"]
     del sampling_scheme["all"]

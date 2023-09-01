@@ -1,15 +1,18 @@
 # Config file to sample sequence databases
-workdir: "sample_gtdb"
+workdir: "prune_gtdb"
 
 # Set which sampling method to use
 # Possible options are "sample_ncbi", "sample_gtdb", or "prune_gtdb"
-method: "sample_gtdb"
+method: "prune_gtdb"
 
 # Random seed to use for sampling processes
 seed: 42
 
+# NCBI API KEY, this option is not required.
+ncbi_api_key: <NCBI_API_KEY>
+
 # Path to file containing list of genome accessions to be included in the final dataset
-#required: "../../config/required-genomes.txt"
+required: <PATH>
 
 # Set what files to download for each genome.
 # If all set to false, the workflow will stop after sampling.
@@ -50,12 +53,17 @@ sample_gtdb:
 # Options for sampling based on GTDB-phylogeny
 prune_gtdb:
   # Number of bacteria remaining after pruning
-  bac120: 300
+  bac120: 76
   # Number of archaea remaining after pruning
-  ar53: 50
+  ar53: 0
   # Discard genomes with completeness less than this value
   completeness: 90
   # Discard genomes with contamination larger than this value
   contamination: 5
   # Method to use for pruning, can be "shortest", "longest", or "random"
   prune_method: "shortest"
+  # Do the pruning for a single taxon, i.e. taxon: "Alphaprotobacteria".
+  # If taxon in bacteria, set ar53: 0, if taxon in archaea, set bac120: 0.
+  taxon: "Planctomycetota"
+  # Select version of GTDB database
+  version: 214

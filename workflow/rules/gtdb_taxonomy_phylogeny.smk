@@ -6,6 +6,7 @@ if "prune_gtdb" not in config.keys():
                             "ar53": 0,
                             "completeness": 0,
                             "contamination": 100,
+                            "taxon": "",
                             "prune_method": "shortest"
                             }
 
@@ -28,6 +29,7 @@ rule prune_gtdb_phylogeny:
         completeness=config["prune_gtdb"]["completeness"],
         contamination=config["prune_gtdb"]["contamination"],
         prune_method=config["prune_gtdb"]["prune_method"],
+        taxon=config["prune_gtdb"]["taxon"],
         seed=config["seed"]
     conda:
         "../envs/ete.yaml"

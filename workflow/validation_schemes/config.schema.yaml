@@ -93,9 +93,11 @@ properties:
     properties:
       bac120:
         type: integer
+        default: 0
         description: prune bacterial gtdb-phylogeny until this number of species is remaining
       ar53:
         type: integer
+        default: 0
         description: prune archaeal gtdb-phylogeny until this number of species is remaining
       completeness:
         type: number
@@ -108,8 +110,11 @@ properties:
         enum: ["random", "shortest", "longest"]
         default: "shortest"
       version:
+        type: number
+        enum: [207, 214]
+        default: 214
+      taxon:
         type: string
-        enum: ["207", "214"]
-        default: "214"
+        default: ""
 
 required: [workdir, method]

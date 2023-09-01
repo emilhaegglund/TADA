@@ -47,6 +47,11 @@ A random seed can be used to reproduce the output of sampling and pruning from t
 seed: 42
 ```
 
+When using the `sample_gtdb` or `sample_ncbi` option a file containing a list of genome accessions to be include in the dataset can be given with the `required` option.
+```
+required: "../config/required-genomes.txt"
+```
+
 ### Select what to download
 TADA can download genomes, CDS (genes), and/or proteomes for the sampled genomes. If all options below are set to False, the workflow will stop after the sampling procedure. TADA will annotate genomes for which no annotation is available using [Prokka](https://github.com/tseemann/prokka).
 
@@ -136,6 +141,7 @@ prune_gtdb:
     completeness: <float>
     contamination: <float>
     prune_method: <str>
+    taxon: <str>
     version: <str>
 ```
 
@@ -149,11 +155,13 @@ prune_gtdb:
 
 `prune_method`: Select what method to use for pruning, `"shortest"` will keep the taxon with the shortest branch in a leaf-pair, `"longest"` will keep the taxon with the longest branch in a leaf-pair, and `"random"` will randomly select one of the taxa to keep in a leaf-pair (Default: `"shortest"`).
 
+`taxon:` Prune only phylogeny under this taxon, other parts of the phylogeny will be discarded. The taxon must be present in the phylogeny.
+
 `version:` Select which version of GTDB to use, `207` and `214` are supported (Default: `214`).
 
-__Example__
+__Example 1__
 
-In the example belwo TADA will first remove all taxa with an estimated completeness under 90% and an estimated contamination over 5%. It will then continue to prune the bacterial phylogeny untill 1000 taxa remains. For the archaeal phylogeny it will prune the phylogeny until 200 taxa remains.
+In the example below TADA will first remove all taxa with an estimated completeness under 90% and an estimated contamination over 5%. It will then continue to prune the bacterial phylogeny untill 1000 taxa remains. For the archaeal phylogeny it will prune the phylogeny until 200 taxa remains.
 
 ```
 prune_gtdb:
@@ -163,6 +171,18 @@ prune_gtdb:
   contamination: 5
   prune_method: "shortest"
 ```
+
+__Example 2__
+In the example below TADA will first remove all genomes that are not of high-quality, next it will prune only the Alphaprotobacteria-clade until 100 taxa remains.
+```
+prune_gtdb:
+  bac120: 100
+  completeness: 90
+  contamination: 5
+  prune_method: "shortest"
+  taxon: "Alphaprotobacteria"
+```
+
 
 ## Defining a sampling scheme
 

@@ -22,19 +22,6 @@ rule download_gtdb_phylogenies:
         wget -P {params.output_dir} {params.url}
         """
 
-rule download_gtdb_taxdump:
-    output:
-        directory("gtdb_data/gtdb-taxdump/")
-    params:
-        output_dir="gtdb_data/",
-        zip_file="gtdb_data/gtdb-taxdump.tar.gz",
-        url="https://github.com/shenwei356/gtdb-taxdump/releases/download/v0.1.1/gtdb-taxdump.tar.gz"
-    shell:
-        """
-        wget -P {params.output_dir} {params.url} && \
-        tar -xvf {params.zip_file} -C {params.output_dir}
-        """
-
 rule remove_suppressed_records_from_metadata:
     input:
         metadata="gtdb_data/{domain}_metadata_r{version}.raw.tsv",
