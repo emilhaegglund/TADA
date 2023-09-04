@@ -1,11 +1,12 @@
 config["include"] = []
-if "proteomes" in config["downloads"]:
-    config["include"].append("protein")
-if "genomes" in config["downloads"]:
-    config["include"].append("genome")
-if "cds" in config["downloads"]:
-    config["include"].append("cds")
-config["include"] = ",".join(config["include"])
+if "downloads" in config:
+    if "proteomes" in config["downloads"]:
+        config["include"].append("protein")
+    if "genomes" in config["downloads"]:
+        config["include"].append("genome")
+    if "cds" in config["downloads"]:
+        config["include"].append("cds")
+    config["include"] = ",".join(config["include"])
 
 # Genomes wiht annotation
 def get_genomes_with_annotation(wildcards):
@@ -185,7 +186,7 @@ rule prokka:
         "../envs/prokka.yaml"
     shell:
         """
-        prokka --outdir {params.outdir} --prefix {params.prefix} --cpus {threads} {input} --force
+        prokka --outdir {params.outdir} --force --prefix {params.prefix} --cpus {threads} {input}
         """
 
 # Use a script to link files from the NCBI and Prokka directories to
@@ -198,7 +199,7 @@ rule collect_proteomes:
     output:
         directory("proteomes/")
     script:
-        "../scripts/move_files.py"
+        "../scripts/link_files.py"
 
 rule collect_cds:
     input:
@@ -244,7 +245,7 @@ rule build_blast_protein:
         prefix="databases/blast_proteomes_db/sdbw_proteomes",
         title="sdbw_proteomes"
     conda:
-        "../envs/ncbi_blast.yaml"
+        "../envs/ncbi-blast.yaml"
     shell:
         """
         cat {input.prokka} {input.ncbi} | makeblastdb -in - -dbtype prot -out {params.prefix} -title {params.title};
@@ -260,7 +261,7 @@ rule build_blast_cds:
         prefix="databases/blast_cds_db/sdbw_cds",
         title="sdbw_cds"
     conda:
-        "../envs/ncbi_blast.yaml"
+        "../envs/ncbi-blast.yaml"
     shell:
         """
         cat {input.prokka} {input.ncbi} | makeblastdb -in - -dbtype nucl -out {params.prefix} -title {params.title}
@@ -276,7 +277,7 @@ rule build_blast_genome:
         prefix="databases/blast_genomes_db/sdbw_genomes",
         title="sdbw_genomes"
     conda:
-        "../envs/ncbi_blast.yaml"
+        "../envs/ncbi-blast.yaml"
     shell:
         """
         cat {input.ncbi} {input.also_ncbi} | makeblastdb -in - -dbtype nucl -out {params.prefix} -title {params.title}

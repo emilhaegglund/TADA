@@ -216,5 +216,7 @@ for taxa_level_index in sampling_order.keys():
         # Finally, add the sampling dataframe to used data
         used_data.append(sampling_df)
 
+
 sampled_df = pd.concat(sampled_dfs)
+sampled_df.rename(columns={"accession":"assembly_accession"}, inplace=True)
 sampled_df.to_csv(output_path, sep='\t', index=False)

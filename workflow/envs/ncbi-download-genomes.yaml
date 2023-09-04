@@ -1,4 +1,0 @@
-channels:
-    - bioconda
-dependencies:
-    - ncbi-genome-download=0.3.1

@@ -67,7 +67,7 @@ TADA can also build different type of Blast-compatible databases, either using t
 
 ```
 databases:
-    blast_genomes: False
+    blast_genome: False
     blast_cds: False
     blast_protein: False
     diamond_protein: True
@@ -95,7 +95,7 @@ In the example below, TADA will sample one taxa from each defined phylum in the 
 ```
 sample_ncbi:
     sampling_scheme: "../config/sampling_scheme.ncbi_refseq.yaml"
-    source: RefSeq
+    database: "RefSeq"
 ```
 
 __Options for sampling the GTDB Taxonomy__

@@ -3,6 +3,9 @@ description: Validation schema for config-file
 
 type: object
 properties:
+  ncbi_api_key:
+    type: string
+    description: ncbi api-key
   workdir:
     type: string
     description: name of output directory
@@ -19,14 +22,14 @@ properties:
     description: path to file containing user defined genome accessions to be included in the final dataset
     default: ""
 
-  download:
+  downloads:
     description: select what type of sequence files to downloads, if all false, workflow will stop after sampling
     properties:
       genomes:
         type: boolean
         default: False
         description: set to True to download genomic sequences of sampled genomes
-      genes:
+      cds:
         type: boolean
         default: False
         description: set to True to download nucleotide sequence for genes from sampled genomes
@@ -34,8 +37,9 @@ properties:
         type: boolean
         default: False
         description: set to True to download proteins from sampled genomes
+    additionalProperties: false
 
-  blast_databases:
+  databases:
     properties:
       blast_genome:
         type: boolean
@@ -53,6 +57,7 @@ properties:
         type: boolean
         default: False
         description: build protein database from proteins using diamond
+    additionalProperties: false
 
   sample_gtdb:
     properties:
@@ -75,19 +80,21 @@ properties:
         type: number
         enum: [207, 214]
         default: 214
-    required: [sampling_scheme]
+    required: [sampling_scheme, gtdb_species_representatives]
+    additionalProperties: false
 
   sample_ncbi:
     properties:
       sampling_scheme:
         type: string
         description: path to sampling scheme
-      source:
+      database:
         type: string
         description: select database to sample from
         enum: ["RefSeq", "GenBank"]
         default: "GenBank"
     required: [sampling_scheme]
+    additionalProperties: false
 
   prune_gtdb:
     properties:
@@ -116,5 +123,8 @@ properties:
       taxon:
         type: string
         default: ""
+    required: [ar53, bac120]
+    additionalProperties: false
 
 required: [workdir, method]
+additionalProperties: false

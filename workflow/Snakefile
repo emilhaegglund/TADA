@@ -8,6 +8,7 @@ def all_input(wildcards):
     """
     wanted_input = []
     base_dir = config["workdir"]
+    print(config)
     if config["method"] == "sample_ncbi":
         with open(config["sample_ncbi"]["sampling_scheme"], "r") as stream:
             sampling_scheme = yaml.safe_load(stream)
@@ -25,16 +26,17 @@ def all_input(wildcards):
         wanted_input.append("prune_gtdb.metadata.tsv")
 
     # Handle download options
-    if "genomes" in config["downloads"]:
-        if config["downloads"]["genomes"]:
-            wanted_input.append("genomes")
-    if "cds" in config["downloads"]:
-        if config["downloads"]["cds"]:
-            wanted_input.append("cds")
-    if "proteomes" in config["downloads"]:
-        if config["downloads"]["proteomes"]:
-            print("download proteomes")
-            wanted_input.append("proteomes")
+    if "downloads" in config:
+        if "genomes" in config["downloads"]:
+            if config["downloads"]["genomes"]:
+                wanted_input.append("genomes")
+        if "cds" in config["downloads"]:
+            if config["downloads"]["cds"]:
+                wanted_input.append("cds")
+        if "proteomes" in config["downloads"]:
+            if config["downloads"]["proteomes"]:
+                print("download proteomes")
+                wanted_input.append("proteomes")
 
     # Handle blast databases options
     if "databases" in config:
@@ -58,6 +60,7 @@ def all_input(wildcards):
                 wanted_input.append(os.path.join('databases', 'blast_cds_db', "sdbw_cds.ndb"))
             else:
                 print("Building Blast cds-database require turning the download cds option to True")
+    print(wanted_input)
     return wanted_input
 
 # Validate config-file
@@ -67,7 +70,6 @@ validate(config, schema="validation_schemes/config.schema.yaml")
 for method in ["sample_gtdb", "sample_ncbi"]:
     if method in config:
         config[method]["sampling_scheme"] = os.path.abspath(config[method]["sampling_scheme"])
-
 # Set workdir
 workdir: config['workdir']
 

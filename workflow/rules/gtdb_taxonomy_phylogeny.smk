@@ -14,7 +14,7 @@ if "sample_gtdb" not in config.keys():
     config["sample_gtdb"] = {"sampling_scheme": "",
                             "completeness": 0,
                             "contamination": 100,
-                            "gtdb_species_representative": False
+                            "gtdb_species_representatives": False
                             }
 
 rule prune_gtdb_phylogeny:
@@ -68,7 +68,7 @@ rule subsample_gtdb:
         sampling_scheme=config["sample_gtdb"]["sampling_scheme"],
         completeness=config["sample_gtdb"]["completeness"],
         contamination=config["sample_gtdb"]["contamination"],
-        gtdb_representative=config["sample_gtdb"]["gtdb_species_representative"],
+        gtdb_representative=config["sample_gtdb"]["gtdb_species_representatives"],
         seed=config["seed"],
     script:
         "../scripts/subsample_gtdb_taxonomy.py"
