@@ -8,12 +8,12 @@ def all_input(wildcards):
     """
     wanted_input = []
     base_dir = config["workdir"]
-    print(config)
+
     if config["method"] == "sample_ncbi":
         with open(config["sample_ncbi"]["sampling_scheme"], "r") as stream:
             sampling_scheme = yaml.safe_load(stream)
         for taxa in sampling_scheme.keys():
-            wanted_input.append(os.path.join("ncbi_data", taxa.replace(" ", "_") + ".tsv"))
+            wanted_input.append(os.path.join("ncbi_data", "taxa", taxa.replace(" ", "_") + ".tsv"))
         wanted_input.append(os.path.join("ncbi_data", "datasets.tsv"))
         wanted_input.append("sample_ncbi.annotation_data.tsv")
 
@@ -70,6 +70,8 @@ validate(config, schema="validation_schemes/config.schema.yaml")
 for method in ["sample_gtdb", "sample_ncbi"]:
     if method in config:
         config[method]["sampling_scheme"] = os.path.abspath(config[method]["sampling_scheme"])
+if "required" in config:
+    config["required"] = os.path.abspath(config["required"])
 # Set workdir
 workdir: config['workdir']
 

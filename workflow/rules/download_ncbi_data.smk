@@ -10,7 +10,7 @@ if config["method"] == "sample_ncbi":
 
 rule download_summary:
     output:
-        "ncbi_data/{taxa}.tsv"
+        "ncbi_data/taxa/{taxa}.tsv"
     params:
         source=config["sample_ncbi"]["database"]
     conda:
@@ -29,7 +29,7 @@ rule merge_genome_summary:
     Merge the genome summary files into a single tsv table
     """
     input:
-        expand("ncbi_data/{taxa}.tsv", taxa=TAXA)
+        expand("ncbi_data/taxa/{taxa}.tsv", taxa=TAXA)
     output:
         "ncbi_data/datasets_unchecked.tsv"
     script:
@@ -90,13 +90,25 @@ rule get_required_genomes_taxid:
         dataformat="logs/get_required_genomes_taxid_dataformat.log"
     shell:
         """
+        echo {input};
         datasets summary genome accession --inputfile {input} --as-json-lines 2> {log.dataset} | \
-        dataformat tsv genome  --fields accession,organism-tax-id > {output} 2> {log.dataformat}
+        dataformat tsv genome  --fields accession,annotinfo-name,assminfo-status,organism-tax-id > {output} 2> {log.dataformat}
         """
+
+rule merge_genome_summary_required_genomes:
+    """
+    Merge the genome summary files into a single tsv table
+    """
+    input:
+        "ncbi_data/required_genomes_unchecked.tsv"
+    output:
+        "ncbi_data/required_genomes_unchecked_anno_info.tsv"
+    script:
+        "../scripts/merge_datasets.py"
 
 rule check_required_genomes_for_euk:
     input:
-        dataset = "ncbi_data/required_genomes_unchecked.tsv",
+        dataset = "ncbi_data/required_genomes_unchecked_anno_info.tsv",
         nodes = "ncbi_data/taxdmp/nodes.dmp"
     params:
         context="required_genomes"

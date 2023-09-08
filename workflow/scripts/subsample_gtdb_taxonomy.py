@@ -61,7 +61,8 @@ df["accession"] = df["accession"].str.replace("RS_", "")
 # If no required file has been given, the input type is not string
 if type(required_genomes_path) == str:
     required_genomes_df = pd.read_csv(required_genomes_path, sep="\t")
-    required_accessions = required_genomes_df["Assembly Accession"].to_list()
+    print(required_genomes_df)
+    required_accessions = required_genomes_df["assembly_accession"].to_list()
     all_accessions = df["accession"].to_list()
     for accession in required_accessions:
         if accession not in all_accessions:
@@ -71,7 +72,7 @@ if type(required_genomes_path) == str:
     required_genomes_df = pd.merge(
         left=required_genomes_df,
         right=df,
-        left_on="Assembly Accession",
+        left_on="assembly_accession",
         right_on="accession",
     )
 

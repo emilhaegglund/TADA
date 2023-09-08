@@ -52,6 +52,11 @@ When using the `sample_gtdb` or `sample_ncbi` option a file containing a list of
 required: "../config/required-genomes.txt"
 ```
 
+An NCBI API Key can be used in the workflow with the following option
+```
+ncbi_api_key: "NCBI-API-KEY"
+```
+
 ### Select what to download
 TADA can download genomes, CDS (genes), and/or proteomes for the sampled genomes. If all options below are set to False, the workflow will stop after the sampling procedure. TADA will annotate genomes for which no annotation is available using [Prokka](https://github.com/tseemann/prokka).
 

@@ -1,38 +1,38 @@
 # Config file to sample sequence databases
-workdir: "prune_gtdb"
+workdir: "sample_ncbi"
 
 # Set which sampling method to use
 # Possible options are "sample_ncbi", "sample_gtdb", or "prune_gtdb"
-method: "prune_gtdb"
+method: "sample_ncbi"
 
 # Random seed to use for sampling processes
 seed: 42
 
 # NCBI API KEY, this option is not required.
-ncbi_api_key: <NCBI_API_KEY>
+#ncbi_api_key: <NCBI_API_KEY>
 
 # Path to file containing list of genome accessions to be included in the final dataset
-required: <PATH>
+#required: <PATH>
 
 # Set what files to download for each genome.
 # If all set to false, the workflow will stop after sampling.
 downloads:
-  genomes: False
-  cds: False
-  proteomes: False
+  genomes: True
+  cds: True
+  proteomes: True
 
 # Set what type of sequence database to generate.
 databases:
-  blast_genome: False
-  blast_cds: False
-  blast_protein: False
-  diamond_protein: False
+  blast_genome: True
+  blast_cds: True
+  blast_protein: True
+  diamond_protein: True
 
 # Options for sampling based on NCBI-taxonomy
 sample_ncbi:
   # Path to sampling scheme
   # Absolute path or relative to workdir
-  sampling_scheme: "../../config/sampling_scheme.basic.yaml"
+  sampling_scheme: "../config/sampling_scheme.basic.yaml"
   # What DB in NCBI to use, can be "RefSeq" or "GenBank"
   database: "RefSeq"
 
@@ -40,13 +40,13 @@ sample_ncbi:
 sample_gtdb:
   # Path to sampling scheme
   # Absolute path or relative to workdir
-  sampling_scheme: "../../config/sampling_scheme.basic.yaml"
+  sampling_scheme: "../config/sampling_scheme.basic.yaml"
   # Discard genomes with completeness less than this value
   completeness: 50
   # Discard genomes with contamination larger than this value
   contamination: 10
   # Keep only representative species in the sampling
-  gtdb_species_representative: True
+  gtdb_species_representatives: True
   # Select version of GTDB database
   version: 214
 
