@@ -90,7 +90,6 @@ rule get_required_genomes_taxid:
         dataformat="logs/get_required_genomes_taxid_dataformat.log"
     shell:
         """
-        echo {input};
         datasets summary genome accession --inputfile {input} --as-json-lines 2> {log.dataset} | \
         dataformat tsv genome  --fields accession,annotinfo-name,assminfo-status,organism-tax-id > {output} 2> {log.dataformat}
         """

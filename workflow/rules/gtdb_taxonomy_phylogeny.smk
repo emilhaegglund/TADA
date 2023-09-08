@@ -1,6 +1,5 @@
 
 # Handle cases where only sample_ncbi is defined in config.
-# TODO: Handle this with validation
 if "prune_gtdb" not in config.keys():
     config["prune_gtdb"] = {"bac120": 0,
                             "ar53": 0,
