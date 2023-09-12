@@ -1,0 +1,29 @@
+# Config file to sample sequence databases
+workdir: "test_output/sample_genbank"
+# Set which sampling method and database to use.
+# auto_download: false will give the user the possibility
+# to add or remove taxa after the sampling
+method: "sample_ncbi"
+
+# Comment out this line if you don't have a NCBI API key
+#ncbi_api_key: $NCBI_API_KEY
+
+# Will not download any proteomes if set to False
+downloads:
+  genomes: True
+  cds: True
+  proteomes: True
+
+# Set what software to use for building output database.
+# If all option are set to false it will stop with a
+# directory containing all proteomes.
+databases:
+  blast_genome: True
+  blast_cds: True
+  blast_protein: True
+  diamond_protein: True
+
+# Options for sampling the RefSeq-database.
+sample_ncbi:
+  sampling_scheme: "config/sampling_scheme.legionella.yaml"
+  database: "GenBank"

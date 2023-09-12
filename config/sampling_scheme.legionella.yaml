@@ -1,0 +1,7 @@
+Legionella pneumophila:
+  sampling_level: species
+  taxa: 10
+
+Legionella maceachernii:
+  sampling_level: species
+  taxa: 2

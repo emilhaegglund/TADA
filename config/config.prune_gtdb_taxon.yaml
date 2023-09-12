@@ -1,0 +1,33 @@
+# Config file to sample sequence databases
+workdir: "test_output/prune_gtdb_taxon"
+
+# Set which sampling method to use
+method: "prune_gtdb"
+
+# Comment out this line if you don't have a NCBI API K#ey
+#ncbi_api_key: $NCBI_API_KEY
+
+# Random seed to use in sampling
+seed: 1
+
+# Will not download any proteomes if set to False
+downloads:
+  proteomes: True
+  genomes: True
+  cds: True
+
+# Set what software to use for building output database.
+databases:
+  blast_genome: True
+  blast_cds: True
+  blast_protein: True
+  diamond_protein: True
+
+# Options for sampling the GTDB-database
+prune_gtdb:
+  bac120: 50
+  ar53: 0
+  completeness: 90
+  contamination: 5
+  prune_method: "shortest"
+  taxon: "Alphaproteobacteria"
