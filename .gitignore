@@ -1,1 +1,2 @@
-.snakmake/
+.snakemake/
+test_output/
