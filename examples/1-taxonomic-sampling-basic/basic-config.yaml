@@ -1,0 +1,9 @@
+workdir: "basic-sampling"
+method: "sample_gtdb"
+seed: 42
+sample_gtdb:
+  sampling_scheme: "basic-sampling-scheme.yaml"
+  completeness: 90
+  contamination: 5
+  gtdb_species_representatives: True
+  version: 214

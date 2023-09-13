@@ -1,0 +1,9 @@
+workdir: "phylogenomic-sampling"
+method: "prune_gtdb"
+seed: 42
+prune_gtdb:
+  bac120: 50
+  completeness: 90
+  contamination: 5
+  version: 214
+  taxon: "Alphaproteobacteria"

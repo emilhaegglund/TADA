@@ -10,7 +10,6 @@ elif snakemake.params.status == "with-annotation":
     df = df[df["annotation"] == True]
 
 os.mkdir(snakemake.output[0])
-print(df)
 for accession in df["assembly_accession"]:
     output_path = os.path.join(snakemake.output[0], accession + ".txt")
     with open(output_path, "w") as fp:

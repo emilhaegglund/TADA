@@ -61,14 +61,12 @@ df["accession"] = df["accession"].str.replace("RS_", "")
 # If no required file has been given, the input type is not string
 if type(required_genomes_path) == str:
     required_genomes_df = pd.read_csv(required_genomes_path, sep="\t")
-    print(required_genomes_df)
     required_accessions = required_genomes_df["assembly_accession"].to_list()
     all_accessions = df["accession"].to_list()
     for accession in required_accessions:
         if accession not in all_accessions:
             print(f"{accession} not in GTDB")
             sys.exit(1)
-
     required_genomes_df = pd.merge(
         left=required_genomes_df,
         right=df,
@@ -93,9 +91,7 @@ taxa_levels = ["domain", "phylum", "class", "order", "family", "genus", "species
 sampling_order = {}  # Store sampling parameters
 
 if sampling_scheme is None:
-    print("in if")
     sampling_scheme = {}
-print(sampling_scheme)
 if "all" in sampling_scheme.keys():
     sampling_parameters = sampling_scheme["all"]
     del sampling_scheme["all"]

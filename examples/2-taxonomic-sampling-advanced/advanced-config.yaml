@@ -1,0 +1,12 @@
+workdir: "advanced-sampling"
+method: "sample_gtdb"
+seed: 42
+downloads:
+  proteomes: True
+databases:
+    diamond_protein: True
+sample_gtdb:
+  sampling_scheme: "advanced-sampling-scheme.yaml"
+  completeness: 90
+  contamination: 5
+  version: 214

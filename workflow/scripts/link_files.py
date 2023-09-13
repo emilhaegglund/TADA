@@ -1,9 +1,7 @@
 # Script to move files from the NCBI and the Prokka directories
 import os
 import sys
-#import shutil
 
-print(snakemake.output[0])
 out_dir = os.path.abspath(snakemake.output[0])
 
 # Make sure that the output dir exists
@@ -15,5 +13,4 @@ for f in snakemake.input:
     target = os.path.join(out_dir,fname)
     target_abs_path = os.path.abspath(target)
     os.symlink(src_abs_path, target_abs_path)
-#    shutil.move(src_abs_path, target)
     print(f"Link {src_abs_path} to {out_dir}")

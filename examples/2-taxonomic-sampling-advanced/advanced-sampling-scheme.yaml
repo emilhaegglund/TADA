@@ -1,0 +1,11 @@
+Bartonella bacilliformis:
+  sampling_level: species
+  taxa: 10
+
+Bartonella:
+  sampling_level: species
+  taxa: 2
+
+Rhizobiales:
+  sampling_level: order
+  taxa: 5
