@@ -6,6 +6,8 @@ if "downloads" in config:
         config["include"].append("genome")
     if "cds" in config["downloads"]:
         config["include"].append("cds")
+    if "gff3" in config["downloads"]:
+        config["include"].append("gff3")
     config["include"] = ",".join(config["include"])
 
 # Genomes wiht annotation
@@ -41,6 +43,15 @@ def get_ncbi_genomes(wildcards):
     return expand(os.path.join("workflow_files",
                                "ncbi_genomes",
                                "{accession}.fna"),
+                               accession=accession
+                               )
+
+def get_ncbi_gff3(wildcards):
+    ck_output = checkpoints.get_genomes_w_annotation.get(**wildcards).output[0]
+    accession, = glob_wildcards(os.path.join(ck_output, "{sample}.txt"))
+    return expand(os.path.join("workflow_files",
+                               "ncbi_gff3",
+                               "{accession}.gff"),
                                accession=accession
                                )
 
@@ -90,6 +101,16 @@ rule unzip_ncbi_cds:
     shell:
         "unzip -p {input} ncbi_dataset/data/{params.acc}/cds_from_genomic.fna > {output}"
 
+rule unzip_ncbi_gff3:
+    input:
+        "workflow_files/ncbi_annotated_data/{accession}.zip"
+    output:
+        "workflow_files/ncbi_gff3/{accession}.gff"
+    params:
+        acc="{accession}"
+    shell:
+        "unzip -p {input} ncbi_dataset/data/{params.acc}/genomic.gff > {output}"
+
 rule unzip_ncbi_genomes_with_annotation:
     input:
         "workflow_files/ncbi_annotated_data/{accession}.zip"
@@ -134,6 +155,17 @@ def get_prokka_cds(wildcards):
                                "{prokka_accession}.ffn"),
                                prokka_accession=accession
                                )
+
+def get_prokka_gff3(wildcards):
+    ck_output = checkpoints.get_genomes_wo_annotation.get(**wildcards).output[0]
+    accession, = glob_wildcards(os.path.join(ck_output, "{sample}.txt"))
+    return expand(os.path.join("workflow_files",
+                               "prokka",
+                               "{prokka_accession}",
+                               "{prokka_accession}.gff"),
+                               prokka_accession=accession
+                               )
+
 
 
 checkpoint get_genomes_wo_annotation:
@@ -219,6 +251,14 @@ rule collect_genomes:
     script:
         "../scripts/link_files.py"
 
+rule collect_gff3:
+    input:
+        prokka=get_prokka_gff3,
+        ncbi=get_ncbi_gff3,
+    output:
+        directory("gff3/")
+    script:
+        "../scripts/link_files.py"
 
 rule build_diamond_protein:
     input:

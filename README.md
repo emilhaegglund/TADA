@@ -58,13 +58,14 @@ ncbi_api_key: "NCBI-API-KEY"
 ```
 
 ### Select what to download
-TADA can download genomes, CDS (genes), and/or proteomes for the sampled genomes. If all options below are set to False, the workflow will stop after the sampling procedure. TADA will annotate genomes for which no annotation is available using [Prokka](https://github.com/tseemann/prokka).
+TADA can download genomes, CDS (genes), proteomes, and/or GFF3 annotations for the sampled genomes. If all options below are set to False, the workflow will stop after the sampling procedure. TADA will annotate genomes for which no annotation is available using [Prokka](https://github.com/tseemann/prokka).
 
 ```
 downloads:
   genomes: False
   cds: False
   proteomes: True
+  gff3: False
 ```
 
 ### Select what databases to create

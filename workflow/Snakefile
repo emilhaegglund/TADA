@@ -42,6 +42,9 @@ def all_input(wildcards):
         if "proteomes" in config["downloads"]:
             if config["downloads"]["proteomes"]:
                 wanted_input.append("proteomes")
+        if "gff3" in config["downloads"]:
+            if config["downloads"]["gff3"]:
+                wanted_input.append("gff3")
 
     # Handle blast databases options
     if "databases" in config:

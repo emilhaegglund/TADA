@@ -37,6 +37,10 @@ properties:
         type: boolean
         default: False
         description: set to True to download proteins from sampled genomes
+      gff3:
+        type: boolean
+        default: False
+        description: set to True to download GFF3 annotations from sampled genomes
     additionalProperties: false
 
   databases:
