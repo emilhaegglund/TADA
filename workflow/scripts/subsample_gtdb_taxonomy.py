@@ -1,27 +1,8 @@
 from types import NoneType
 import pandas as pd
 import yaml
+import tada
 import sys
-
-
-def check_taxa_name(taxa, taxa_levels, df):
-    """
-    Check that taxa is a valid taxa name
-    """
-    for level in taxa_levels:
-        if taxa in df[level].to_list():
-            return True
-    return False
-
-
-def get_taxa_level_index(taxa, taxa_levels, df):
-    """
-    Find the taxa level index for a taxa
-    """
-    for taxa_level_index, level in enumerate(taxa_levels):
-        if taxa in df[level].to_list():
-            return taxa_level_index
-
 
 # Define variables from snakemake
 gtdb_metadata = snakemake.input.metadata
@@ -99,10 +80,10 @@ if "all" in sampling_scheme.keys():
     sampling_scheme["Archaea"] = sampling_parameters
 
 for taxa in sampling_scheme:
-    if check_taxa_name(taxa, taxa_levels, df):
+    if tada.check_taxa_name(taxa, taxa_levels, df):
         sampling_level = sampling_scheme[taxa]["sampling_level"]
         n_taxa = sampling_scheme[taxa]["taxa"]
-        taxa_level_index = get_taxa_level_index(taxa, taxa_levels, df)
+        taxa_level_index = tada.get_taxa_level_index(taxa, taxa_levels, df)
         sampling_level_index = taxa_levels.index(sampling_level)
         # Make sure that we not sample from a higher taxonomic level
         # compared to the given taxonomic name

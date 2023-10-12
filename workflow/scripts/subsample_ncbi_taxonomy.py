@@ -1,57 +1,13 @@
 import pandas as pd
+import tada
 import yaml
 import sys
-
-
-def read_names(names_path):
-    names = {}
-    with open(names_path, "r") as f:
-        for line in f:
-            line = line.strip("\n")
-            line = line.split("\t|\t")
-            if line[-1].strip("\t|") == "scientific name":
-                names[int(line[0])] = line[1]
-    return names
-
-
-def read_taxonomy(nodes_path):
-    taxonomy = {}
-    with open(nodes_path, "r") as f:
-        for line in f:
-            line = line.strip("\n")
-            line = line.split("|")
-            taxid = int(line[0].strip("\t"))
-            parent_taxid = int(line[1].strip("\t"))
-            rank = line[2].strip("\t")
-            if rank == "superkingdom":
-                rank = "domain"
-            taxonomy[taxid] = [parent_taxid, rank]
-
-    return taxonomy
-
-
-def check_taxa_name(taxa, taxa_levels, df):
-    """
-    Check that taxa is a valid taxa name
-    """
-    for level in taxa_levels:
-        if taxa in df[level].to_list():
-            return True
-    return False
-
-
-def get_taxa_level_index(taxa, taxa_levels, df):
-    """
-    Find the taxa level index for a taxa
-    """
-    for taxa_level_index, level in enumerate(taxa_levels):
-        if taxa in df[level].to_list():
-            return taxa_level_index
 
 
 ncbi_metadat_path = snakemake.input.metadata
 names_path = snakemake.input.names
 nodes_path = snakemake.input.nodes
+merged_path = snakemake.input.merged
 required_genomes_path = snakemake.input.required_genomes
 sampling_scheme_path = snakemake.params.sampling_scheme
 seed = snakemake.params.seed
@@ -67,18 +23,13 @@ if type(required_genomes_path) == str:
     required_genomes_df = pd.read_csv(required_genomes_path, sep="\t")
     required_genomes_df["required"] = True
     assemblies_df = pd.concat([assemblies_df, required_genomes_df])
-#    required_accessions = required_genomes_df["Assembly Accession"].to_list()
-#    all_accessions = df["accession"].to_list()
-
-#    required_genomes_df = pd.merge(left=required_genomes_df, right=df, left_on="Assembly Accession", right_on="accession")
 
 taxa_levels = ["domain", "phylum", "class", "order", "family", "genus", "species"]
-taxonomy = read_taxonomy(nodes_path)
-names = read_names(names_path)
+
+
+taxonomy = tada.taxdmp_taxonomy(nodes_path)
+names = tada.taxdmp_names(names_path)
 data = []
-
-print(assemblies_df)
-
 for taxid in assemblies_df["taxid"]:
     discard = False  # If taxid is missing from taxonomy files, remove it
     lineage = [taxid]
@@ -100,8 +51,9 @@ for taxid in assemblies_df["taxid"]:
         data.append(lineage)
 
 taxonomy_df = pd.DataFrame(data, columns=["taxid"] + taxa_levels[::-1])
-taxonomy_df.to_csv("test.taxonomy.tsv", sep="\t", index=False)
+#taxonomy_df.to_csv("test.taxonomy.tsv", sep="\t", index=False)
 taxonomy_df.drop_duplicates(inplace=True)
+
 df = pd.merge(left=assemblies_df, right=taxonomy_df, on="taxid")
 df = df.rename(columns={"assembly_accession": "accession"})
 
@@ -116,13 +68,12 @@ if "all" in sampling_scheme.keys():
     del sampling_scheme["all"]
     sampling_scheme["Bacteria"] = sampling_parameters
     sampling_scheme["Archaea"] = sampling_parameters
-    sampling_scheme["Eukaryota"] = sampling_parameters
 
 for taxa in sampling_scheme:
-    if check_taxa_name(taxa, taxa_levels, df):
+    if tada.check_taxa_name(taxa, taxa_levels, df):
         sampling_level = sampling_scheme[taxa]["sampling_level"]
         n_taxa = sampling_scheme[taxa]["taxa"]
-        taxa_level_index = get_taxa_level_index(taxa, taxa_levels, df)
+        taxa_level_index = tada.get_taxa_level_index(taxa, taxa_levels, df)
         sampling_level_index = taxa_levels.index(sampling_level)
         # Make sure that we not sample from a higher taxonomic level
         # compared to the given taxonomic name

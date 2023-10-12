@@ -1,21 +1,6 @@
 import pandas as pd
 import sys
-
-
-def read_taxonomy(nodes_path):
-    taxonomy = {}
-    with open(nodes_path, "r") as f:
-        for line in f:
-            line = line.strip("\n")
-            line = line.split("|")
-            taxid = int(line[0].strip("\t"))
-            parent_taxid = int(line[1].strip("\t"))
-            rank = line[2].strip("\t")
-            if rank == "superkingdom":
-                rank = "domain"
-            taxonomy[taxid] = [parent_taxid, rank]
-
-    return taxonomy
+import tada
 
 # Read original dataset
 df = pd.read_csv(snakemake.input.dataset, sep="\t")
@@ -23,11 +8,14 @@ if "Organism Taxonomic ID" in df.columns:
     df.rename(columns={"Organism Taxonomic ID":"taxid"}, inplace=True)
 
 # Read NCBI taxonomy
-taxonomy = read_taxonomy(snakemake.input.nodes)
+taxonomy = tada.taxdmp_taxonomy(snakemake.input.nodes)
+
+# Fix merged nodes
+merged_nodes = tada.taxdmp_merged_nodes(snakemake.input.merged_nodes)
+df["taxid"] = df['taxid'].map(merged_nodes).fillna(df['taxid'])
 
 # Find Taxids that is in eukaryota, viruses, other,
 # and unclassified
-taxid_to_exclude = []
 for taxid in df["taxid"].unique():
     curr_taxid = taxid
     rank = ""

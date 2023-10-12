@@ -13,7 +13,13 @@ def all_input(wildcards):
         with open(config["sample_ncbi"]["sampling_scheme"], "r") as stream:
             sampling_scheme = yaml.safe_load(stream)
         for taxa in sampling_scheme.keys():
-            wanted_input.append(os.path.join("ncbi_data", "taxa", taxa.replace(" ", "_") + ".tsv"))
+            if taxa == 'all':  # If all, only include Bacteria and Archaea
+                print('Bact, Arch')
+                wanted_input.append(os.path.join("ncbi_data", "taxa", "Bacteria.tsv"))
+                wanted_input.append(os.path.join("ncbi_data", "taxa", "Archaea.tsv"))
+            else:
+                print(taxa)
+                wanted_input.append(os.path.join("ncbi_data", "taxa", taxa.replace(" ", "_") + ".tsv"))
         wanted_input.append(os.path.join("ncbi_data", "datasets.tsv"))
         wanted_input.append("sample_ncbi.annotation_data.tsv")
 

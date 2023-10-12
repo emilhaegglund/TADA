@@ -6,7 +6,11 @@ if config["method"] == "sample_ncbi":
     with open(config["sample_ncbi"]["sampling_scheme"], "r") as stream:
         sampling_scheme = yaml.safe_load(stream)
     for taxa in sampling_scheme.keys():
-        TAXA.append(taxa.replace(" ", "_"))
+        if taxa == 'all':
+            TAXA.append("Bacteria")
+            TAXA.append("Archaea")
+        else:
+            TAXA.append(taxa.replace(" ", "_"))
 
 rule download_summary:
     output:
@@ -38,7 +42,8 @@ rule merge_genome_summary:
 rule check_for_euk:
     input:
         dataset = "ncbi_data/datasets_unchecked.tsv",
-        nodes = "ncbi_data/taxdmp/nodes.dmp"
+        nodes = "ncbi_data/taxdmp/nodes.dmp",
+        merged_nodes = "ncbi_data/taxdmp/merged.dmp"
     params:
         context = "sampling_scheme"
     output:
@@ -71,13 +76,13 @@ rule download_suppressed_refseq_records:
 rule download_taxdmp:
     output:
         "ncbi_data/taxdmp/nodes.dmp",
-        "ncbi_data/taxdmp/names.dmp"
+        "ncbi_data/taxdmp/names.dmp",
+        "ncbi_data/taxdmp/merged.dmp"
     params:
         output_dir="ncbi_data/"
     shell:
         "wget -P {params.output_dir} https://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip && unzip {params.output_dir}/taxdmp.zip -d {params.output_dir}/taxdmp"
 
-# Check required genomes exists and that they are in Archaea or Bacteria
 rule get_required_genomes_taxid:
     input:
         config["required"]
@@ -108,7 +113,8 @@ rule merge_genome_summary_required_genomes:
 rule check_required_genomes_for_euk:
     input:
         dataset = "ncbi_data/required_genomes_unchecked_anno_info.tsv",
-        nodes = "ncbi_data/taxdmp/nodes.dmp"
+        nodes = "ncbi_data/taxdmp/nodes.dmp",
+        merged_nodes = "ncbi_data/taxdmp/merged.dmp"
     params:
         context="required_genomes"
     output:
