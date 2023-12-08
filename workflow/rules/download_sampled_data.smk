@@ -288,7 +288,9 @@ rule build_blast_protein:
         "../envs/ncbi-blast.yaml"
     shell:
         """
-        cat {input.prokka} {input.ncbi} | makeblastdb -in - -dbtype prot -out {params.prefix} -title {params.title} -parse_seqids;
+        cat {input.prokka} {input.ncbi} | \
+        seqkit rmdup | \
+        makeblastdb -in - -dbtype prot -out {params.prefix} -title {params.title} -parse_seqids;
         """
 
 rule build_blast_cds:
@@ -304,7 +306,9 @@ rule build_blast_cds:
         "../envs/ncbi-blast.yaml"
     shell:
         """
-        cat {input.prokka} {input.ncbi} | makeblastdb -in - -dbtype nucl -out {params.prefix} -title {params.title} -parse_seqids;
+        cat {input.prokka} {input.ncbi} | \
+        seqkit rmdup | \
+        makeblastdb -in - -dbtype nucl -out {params.prefix} -title {params.title} -parse_seqids;
         """
 
 rule build_blast_genome:
@@ -320,5 +324,7 @@ rule build_blast_genome:
         "../envs/ncbi-blast.yaml"
     shell:
         """
-        cat {input.ncbi} {input.also_ncbi} | makeblastdb -in - -dbtype nucl -out {params.prefix} -title {params.title} -parse_seqids;
+        cat {input.ncbi} {input.also_ncbi} | \
+        seqkit rmdup | \
+        makeblastdb -in - -dbtype nucl -out {params.prefix} -title {params.title} -parse_seqids;
         """

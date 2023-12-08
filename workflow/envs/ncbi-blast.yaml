@@ -2,3 +2,4 @@ channels:
     - bioconda
 dependencies:
     - blast=2.12.0
+    - seqkit=2.6.1
