@@ -1,4 +1,4 @@
-# TADA - Taxonomic Aware Dataset Assembly
+# TADA - Taxonomic-Aware Dataset Aggregator
 A Snakemake workflow to assemble balanced, representative and manageable datasets for comparative and phylogenetic analysis of bacteria and archaea. Datasets can be generated based either on the phylogenomic tree offered by [GTDB](https://gtdb.ecogenomic.org) , or on the taxonomy offered by GTDB or by [NCBI](https://www.ncbi.nlm.nih.gov/taxonomy).
 
 ## Dependency
