@@ -208,7 +208,8 @@ rule prokka:
         "workflow_files/genomes_wo_annotation/{prokka_accession}.fna"
     output:
         proteomes="workflow_files/prokka/{prokka_accession}/{prokka_accession}.faa",
-        cds="workflow_files/prokka/{prokka_accession}/{prokka_accession}.ffn"
+        cds="workflow_files/prokka/{prokka_accession}/{prokka_accession}.ffn",
+        gff3="workflow_files/prokka/{prokka_accession}/{prokka_accession}.gff"
     params:
         prefix="{prokka_accession}",
         outdir="workflow_files/prokka/{prokka_accession}"

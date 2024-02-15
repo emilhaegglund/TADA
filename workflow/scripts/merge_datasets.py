@@ -7,7 +7,7 @@ import pandas as pd
 # Open and merge the tables
 dfs = []
 for df_path in snakemake.input:
-    df = pd.read_csv(df_path, sep="\t")
+    df = pd.read_csv(df_path, sep="\t", lineterminator="\n")
     dfs.append(df)
 df = pd.concat(dfs)
 
