@@ -84,7 +84,7 @@ rule download_gtdb_summary:
         awk -F'\\t'  '{{ print $1 }}' {input} | sed '1d' > accessions.tmp;
         head accessions.tmp;
         datasets summary genome accession --inputfile accessions.tmp \
-            --as-json-lines | \
+            --as-json-lines | sed 's/\\\\t//g' | \
         dataformat tsv genome > {output};
         rm accessions.tmp;
         """
