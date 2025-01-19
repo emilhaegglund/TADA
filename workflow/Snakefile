@@ -1,74 +1,4 @@
 from snakemake.utils import validate
-import yaml
-import os
-
-def all_input(wildcards):
-    """
-    Generate all inputs for the rule all
-    """
-    wanted_input = []
-    base_dir = config["workdir"]
-
-    if config["method"] == "sample_ncbi":
-        with open(config["sample_ncbi"]["sampling_scheme"], "r") as stream:
-            sampling_scheme = yaml.safe_load(stream)
-        for taxa in sampling_scheme.keys():
-            if taxa == 'all':  # If all, only include Bacteria and Archaea
-                print('Bact, Arch')
-                wanted_input.append(os.path.join("ncbi_data", "taxa", "Bacteria.tsv"))
-                wanted_input.append(os.path.join("ncbi_data", "taxa", "Archaea.tsv"))
-            else:
-                print(taxa)
-                wanted_input.append(os.path.join("ncbi_data", "taxa", taxa.replace(" ", "_") + ".tsv"))
-        wanted_input.append(os.path.join("ncbi_data", "datasets.tsv"))
-        wanted_input.append("sample_ncbi.annotation_data.tsv")
-
-    if config["method"] == "sample_gtdb":
-        #wanted_input.append("sample_gtdb.annotation_data.tsv")
-        wanted_input.append("sample_gtdb.metadata.tsv")
-
-    if config["method"] == "prune_gtdb":
-        gtdb_version = str(config["prune_gtdb"]["version"])
-        wanted_input.append("prune_gtdb.metadata.tsv")
-
-    # Handle download options
-    if "downloads" in config:
-        if "genomes" in config["downloads"]:
-            if config["downloads"]["genomes"]:
-                wanted_input.append("genomes")
-        if "cds" in config["downloads"]:
-            if config["downloads"]["cds"]:
-                wanted_input.append("cds")
-        if "proteomes" in config["downloads"]:
-            if config["downloads"]["proteomes"]:
-                wanted_input.append("proteomes")
-        if "gff3" in config["downloads"]:
-            if config["downloads"]["gff3"]:
-                wanted_input.append("gff3")
-
-    # Handle blast databases options
-    if "databases" in config:
-        if config["databases"]["diamond_protein"] and config["downloads"]["proteomes"]:
-            if config["downloads"]["proteomes"]:
-                wanted_input.append(os.path.join('databases', 'diamond_proteomes_db', "sdbw_proteomes.dmnd"))
-            else:
-                print("Building Diamond-database require turning the download proteome option to True")
-        if config["databases"]["blast_protein"]:
-            if config["downloads"]["proteomes"]:
-                wanted_input.append(os.path.join('databases', 'blast_proteomes_db', "sdbw_proteomes.pdb"))
-            else:
-                print("Building Blast protein-database require turning the download proteome option to True")
-        if config["databases"]['blast_genome']:
-            if config["downloads"]["genomes"]:
-                wanted_input.append(os.path.join('databases', 'blast_genomes_db', "sdbw_genomes.ndb"))
-            else:
-                print("Building Blast genome-database require turning the download genomes option to True")
-        if config["databases"]['blast_cds']:
-            if config["downloads"]["cds"]:
-                wanted_input.append(os.path.join('databases', 'blast_cds_db', "sdbw_cds.ndb"))
-            else:
-                print("Building Blast cds-database require turning the download cds option to True")
-    return wanted_input
 
 # Validate config-file
 validate(config, schema="validation_schemes/config.schema.yaml")
@@ -85,6 +15,7 @@ if "required" in config:
 workdir: config['workdir']
 
 # Include rules
+include: "rules/commons.smk"
 include: "rules/download_gtdb_data.smk"
 include: "rules/download_ncbi_data.smk"
 if config["method"] in ["sample_gtdb", "prune_gtdb"]:

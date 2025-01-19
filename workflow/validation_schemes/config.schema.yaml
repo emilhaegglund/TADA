@@ -9,6 +9,7 @@ properties:
   workdir:
     type: string
     description: name of output directory
+
   method:
     type: string
     enum: ["sample_gtdb", "sample_ncbi", "prune_gtdb"]
@@ -82,8 +83,8 @@ properties:
         default: False
       version:
         type: number
-        enum: [207, 214]
-        default: 214
+        enum: [207, 214, 220]
+        default: 220
     required: [sampling_scheme, gtdb_species_representatives]
     additionalProperties: false
 
@@ -122,8 +123,8 @@ properties:
         default: "shortest"
       version:
         type: number
-        enum: [207, 214]
-        default: 214
+        enum: [207, 214, 220]
+        default: 220
       taxon:
         type: string
         default: ""

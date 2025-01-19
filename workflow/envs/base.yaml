@@ -1,4 +1,5 @@
 channels:
     - conda-forge
 dependencies:
-    - ncbi-datasets-cli=16.38.1
+    - python
+    - pandas

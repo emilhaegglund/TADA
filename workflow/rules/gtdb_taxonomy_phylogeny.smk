@@ -35,24 +35,17 @@ rule prune_gtdb_phylogeny:
     script:
         "../scripts/prune_gtdb_phylogeny.py"
 
-def bac120_prune_input(wildcards):
-    return "prune_gtdb.bac120_r" + str(config["prune_gtdb"]["version"]) + ".metadata.tsv"
-
-def ar53_prune_input(wildcards):
-    return "prune_gtdb.ar53_r" + str(config["prune_gtdb"]["version"]) + ".metadata.tsv"
-
-
 rule merge_prune_gtdb_output:
     input:
         bacteria_metadata = bac120_prune_input,
         archaea_metadata = ar53_prune_input
     output:
         metadata="prune_gtdb.metadata.tsv"
+    conda:
+        "../envs/base.yaml"
     script:
         "../scripts/merge_pruned_tables.py"
 
-def subsample_input(wildcards):
-    return "gtdb_data/metadata_r" + str(config["sample_gtdb"]["version"]) + ".wo_suppressed_records.tsv"
 
 rule subsample_gtdb:
     """
@@ -63,6 +56,8 @@ rule subsample_gtdb:
         required_genomes="ncbi_data/required_genomes_checked.tsv" if config["required"] != "" else []
     output:
         "sample_gtdb.metadata.tsv"
+    conda:
+        "../envs/base.yaml"
     params:
         sampling_scheme=config["sample_gtdb"]["sampling_scheme"],
         completeness=config["sample_gtdb"]["completeness"],
@@ -79,13 +74,14 @@ rule download_gtdb_summary:
         temp("{method}.ncbi_datasets.tsv")
     conda:
         "../envs/ncbi-datasets.yaml"
+    log:
+        "logs/download_gtdb_summary.{method}.log" 
     shell:
         """
         awk -F'\\t'  '{{ print $1 }}' {input} | sed '1d' > accessions.tmp;
-        head accessions.tmp;
         datasets summary genome accession --inputfile accessions.tmp \
             --as-json-lines | sed 's/\\\\t//g' | \
-        dataformat tsv genome > {output};
+        dataformat tsv genome > {output} 2> {log};
         rm accessions.tmp;
         """
 
@@ -97,5 +93,7 @@ rule filter_gtdb:
         "{method}.ncbi_datasets.tsv"
     output:
         "{method}.annotation_data.tsv"
+    conda:
+        "../envs/base.yaml"
     script:
         "../scripts/merge_datasets.py"

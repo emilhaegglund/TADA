@@ -27,4 +27,4 @@ sample_gtdb:
   completeness: 90
   contamination: 10
   gtdb_species_representatives: True
-  version: 214
+  version: 220

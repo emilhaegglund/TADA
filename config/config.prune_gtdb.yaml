@@ -30,3 +30,4 @@ prune_gtdb:
   completeness: 90
   contamination: 5
   prune_method: "shortest"
+  version: 220

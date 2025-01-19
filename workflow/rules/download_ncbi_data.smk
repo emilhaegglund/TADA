@@ -19,13 +19,14 @@ rule download_summary:
         source=config["sample_ncbi"]["database"]
     conda:
         "../envs/ncbi-datasets.yaml"
+    log:
+        "logs/download_summary.{taxa}.log"
     shell:
         """
         taxa=$(echo {wildcards.taxa} | sed -e "s/_/ /");
-        taxa_new="'$taxa'";
-        datasets summary genome taxon "$taxa_new" --assembly-source {params.source} \
+        datasets summary genome taxon "$taxa" --tax-exact-match --assembly-source {params.source} \
             --as-json-lines | \
-        dataformat tsv genome --fields accession,annotinfo-name,assminfo-status,organism-tax-id > {output};
+        dataformat tsv genome --fields accession,annotinfo-name,assminfo-status,organism-tax-id > {output}; 2> {log}
         """
 
 rule merge_genome_summary:
@@ -36,6 +37,8 @@ rule merge_genome_summary:
         expand("ncbi_data/taxa/{taxa}.tsv", taxa=TAXA)
     output:
         "ncbi_data/datasets_unchecked.tsv"
+    conda:
+        "../envs/base.yaml"
     script:
         "../scripts/merge_datasets.py"
 
@@ -44,33 +47,41 @@ rule check_for_euk:
         dataset = "ncbi_data/datasets_unchecked.tsv",
         nodes = "ncbi_data/taxdmp/nodes.dmp",
         merged_nodes = "ncbi_data/taxdmp/merged.dmp"
-    params:
-        context = "sampling_scheme"
     output:
         dataset = "ncbi_data/datasets.tsv"
+    conda:
+        "../envs/base.yaml"
+    params:
+        context = "sampling_scheme"
     script:
         "../scripts/check_for_non_supported_taxa.py"
 
 rule download_suppressed_genbank_records:
     output:
         "ncbi_data/assembly_summary_genbank_historical.txt"
+    conda:
+        "../envs/base.yaml"
     params:
-        output_dir="ncbi_data/",
+        output_dir=lambda w, output: os.path.split(output[0])[0],
         url="https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_genbank_historical.txt"
+    log:
+        "logs/download_supressed_genbank_records.log"
     shell:
         """
-        wget -P {params.output_dir} {params.url}
+        wget -P {params.output_dir} {params.url} 2> {log}
         """
 
 rule download_suppressed_refseq_records:
     output:
         "ncbi_data/assembly_summary_refseq_historical.txt"
     params:
-        output_dir="ncbi_data/",
+        output_dir=lambda w, output: os.path.split(output[0])[0],
         url="https://ftp.ncbi.nlm.nih.gov/genomes/ASSEMBLY_REPORTS/assembly_summary_refseq_historical.txt"
+    log:
+        "logs/download_suppressed_refseq_records.log"
     shell:
         """
-        wget -P {params.output_dir} {params.url}
+        wget -P {params.output_dir} {params.url} 2> {log}
         """
 
 rule download_taxdmp:
@@ -78,10 +89,14 @@ rule download_taxdmp:
         "ncbi_data/taxdmp/nodes.dmp",
         "ncbi_data/taxdmp/names.dmp",
         "ncbi_data/taxdmp/merged.dmp"
+    conda:
+        "../envs/base.yaml"
     params:
-        output_dir="ncbi_data/"
+        output_dir=lambda w, output: os.path.split(os.path.splitext(output[0])[0])[0],
+    log:
+        "logs/download_taxdmp.log"
     shell:
-        "wget -P {params.output_dir} https://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip && unzip {params.output_dir}/taxdmp.zip -d {params.output_dir}/taxdmp"
+        "wget -P {params.output_dir} https://ftp.ncbi.nih.gov/pub/taxonomy/taxdmp.zip && unzip {params.output_dir}/taxdmp.zip -d {params.output_dir} 2> {log}"
 
 rule get_required_genomes_taxid:
     input:
@@ -107,6 +122,8 @@ rule merge_genome_summary_required_genomes:
         "ncbi_data/required_genomes_unchecked.tsv"
     output:
         "ncbi_data/required_genomes_unchecked_anno_info.tsv"
+    conda:
+        "../envs/base.yaml"
     script:
         "../scripts/merge_datasets.py"
 
@@ -115,9 +132,11 @@ rule check_required_genomes_for_euk:
         dataset = "ncbi_data/required_genomes_unchecked_anno_info.tsv",
         nodes = "ncbi_data/taxdmp/nodes.dmp",
         merged_nodes = "ncbi_data/taxdmp/merged.dmp"
-    params:
-        context="required_genomes"
     output:
         dataset = "ncbi_data/required_genomes_checked.tsv"
+    conda:
+        "../envs/base.yaml"
+    params:
+        context="required_genomes"
     script:
         "../scripts/check_for_non_supported_taxa.py"

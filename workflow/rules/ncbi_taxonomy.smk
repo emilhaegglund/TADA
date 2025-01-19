@@ -7,6 +7,8 @@ rule subsample_assembly_summary:
         required_genomes="ncbi_data/required_genomes_checked.tsv" if config["required"] != "" else []
     output:
         "sample_ncbi.annotation_data.tsv"
+    conda:
+        "../envs/base.yaml"
     params:
         sampling_scheme=config["sample_ncbi"]["sampling_scheme"],
         seed=config["seed"]
